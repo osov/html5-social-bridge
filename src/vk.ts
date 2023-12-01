@@ -41,7 +41,6 @@ export class VkSdk extends BaseSdk {
                             }
                         })
                         .finally(() => {
-                            this._isStorageSupported = true;
                             this.load_all_data_from_storage(cb_ready);
                         })
 

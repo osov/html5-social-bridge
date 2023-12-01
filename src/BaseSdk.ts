@@ -9,7 +9,6 @@ export class BaseSdk {
     protected _playerId = '';
     protected _playerName = ''
     protected _playerPhotos: string[] = []
-    protected _isStorageSupported = false
     protected _isBannerSupported = false;
     protected _platformStorageCachedData = null
     protected _has_ad_block = false

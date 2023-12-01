@@ -29,13 +29,12 @@ export class YandexSdk extends BaseSdk {
 
                         let getSafeStoragePromise = this._platformSdk.getStorage()
                             .then((safeStorage) => {
-                                Object.defineProperty(window, 'localStorage', { get: () => safeStorage });
                                 this._localStorage = safeStorage;
                             })
 
                         Promise.all([getPlayerPromise, getLeaderboardsPromise, getSafeStoragePromise])
                             .finally(() => {
-                                this._isStorageSupported = true; // todo хранилище доступно даже если не авторизован ^_^ this._isPlayerAuthorized;
+                                // todo хранилище доступно даже если не авторизован ^_^ 
                                 this.load_all_data_from_storage(cb_ready);
                             })
                     })
@@ -121,9 +120,6 @@ export class YandexSdk extends BaseSdk {
     }
 
     get_data_from_storage(params: { key: string | string[] }, cb: CbResultData) {
-        if (!this._isStorageSupported)
-            return super.get_data_from_storage(params, cb);
-
         const tmp = this._get_cached_storage(params);
         if (tmp[0] === true) {
             return cb(true, tmp[1]);
@@ -148,15 +144,12 @@ export class YandexSdk extends BaseSdk {
                     cb(false)
                 })
         } else {
-            cb(false)
+            super.get_data_from_storage(params, cb);
         }
 
     }
 
     set_data_to_storage(params: { key: string | string[], value: any }, cb: CbResultVal) {
-        if (!this._isStorageSupported)
-            return super.set_data_to_storage(params, cb);
-
         if (this._yandexPlayer) {
             let data = this._platformStorageCachedData !== null ? { ...this._platformStorageCachedData } : {}
             if (Array.isArray(params.key)) {
@@ -187,9 +180,6 @@ export class YandexSdk extends BaseSdk {
     }
 
     delete_data_from_storage(params: { key: string }, cb: CbResultVal) {
-        if (!this._isStorageSupported)
-            return super.delete_data_from_storage(params, cb);
-
         if (this._yandexPlayer) {
             let data = this._platformStorageCachedData !== null ? { ...this._platformStorageCachedData } : {}
             if (Array.isArray(params.key)) {
@@ -209,7 +199,7 @@ export class YandexSdk extends BaseSdk {
                     cb(false)
                 })
         } else {
-            cb(false)
+            super.delete_data_from_storage(params, cb);
         }
     }
 
