@@ -7,11 +7,11 @@ export class BaseSdk {
     protected _localStorage = null;
     protected _isPlayerAuthorized = false;
     protected _playerId = '';
-    protected _playerName = ''
-    protected _playerPhotos: string[] = []
+    protected _playerName = '';
+    protected _playerPhotos: string[] = [];
     protected _isBannerSupported = false;
-    protected _platformStorageCachedData = null
-    protected _has_ad_block = false
+    protected _platformStorageCachedData = null;
+    protected _has_ad_block = false;
     protected _platformId = '';
     protected platform = '';
     protected _visibilityState: boolean;
@@ -26,16 +26,17 @@ export class BaseSdk {
 
 
     constructor(cb_ready: CbResultVal, is_load_data_from_storage = false) {
-        try { this._localStorage = window.localStorage } catch (e) { }
+        try { this._localStorage = window.localStorage; } catch (e) { }
         this._visibilityState = document.visibilityState == 'visible';
         document.addEventListener('visibilitychange', () => {
             this._visibilityState = document.visibilityState == 'visible';
-            //this.log('on_visible_changed', this._visibilityState);
             if (this.cb_visible_state)
                 this.cb_visible_state(this._visibilityState);
         });
         if (is_load_data_from_storage)
             this.load_all_data_from_storage(cb_ready);
+        else
+            cb_ready(true);
     }
 
     log(...args) {
@@ -62,16 +63,16 @@ export class BaseSdk {
     }
 
     get_language() {
-        let value = navigator.language
+        const value = navigator.language;
         if (typeof value === 'string') {
-            return value.substring(0, 2).toLowerCase()
+            return value.substring(0, 2).toLowerCase();
         }
-        return 'en'
+        return 'en';
     }
 
     get_payload() {
-        let url = new URL(window.location.href)
-        return url.searchParams.get('payload')
+        const url = new URL(window.location.href);
+        return url.searchParams.get('payload');
     }
 
     is_favorite_supported() {
@@ -79,57 +80,57 @@ export class BaseSdk {
     }
 
     is_share_supported() {
-        return false
+        return false;
     }
 
     // player
 
     is_player_authorized() {
-        return this._isPlayerAuthorized
+        return this._isPlayerAuthorized;
     }
 
     player_id() {
-        return this._playerId
+        return this._playerId;
     }
 
     player_name() {
-        return this._playerName
+        return this._playerName;
     }
 
     player_photos() {
-        return this._playerPhotos
+        return this._playerPhotos;
     }
 
     // storage
 
     _get_data_from_local_storage(key: string) {
-        let value = this._localStorage.getItem(key)
-        return this.decode_storage_value(value)
+        const value = this._localStorage.getItem(key);
+        return this.decode_storage_value(value);
     }
 
     _set_data_to_local_storage(key: string, value: any) {
-        this._localStorage.setItem(key, this.encode_storage_value(value))
+        this._localStorage.setItem(key, this.encode_storage_value(value));
         // cache
         if (this._platformStorageCachedData != null)
-            this._platformStorageCachedData[key] = value
+            this._platformStorageCachedData[key] = value;
     }
 
     _delete_data_from_local_storage(key: string) {
-        this._localStorage.removeItem(key)
+        this._localStorage.removeItem(key);
         delete this._platformStorageCachedData[key];
     }
 
 
     encode_storage_value(value: any) {
         if (typeof value !== 'string')
-            value = JSON.stringify(value)
+            value = JSON.stringify(value);
         return value;
     }
 
     decode_storage_value(value: any) {
         if (typeof value === 'string') {
             try {
-                value = JSON.parse(value)
+                value = JSON.parse(value);
             }
             catch (e) { }
         }
@@ -143,15 +144,15 @@ export class BaseSdk {
     _get_cached_storage(params: { key: string | string[] }) {
         if (this._platformStorageCachedData) {
             if (Array.isArray(params.key)) {
-                let values = []
+                const values = [];
                 for (let i = 0; i < params.key.length; i++) {
-                    let value = typeof this._platformStorageCachedData[params.key[i]] === 'undefined' ? null : this._platformStorageCachedData[params.key[i]]
-                    values.push(value)
+                    const value = typeof this._platformStorageCachedData[params.key[i]] === 'undefined' ? null : this._platformStorageCachedData[params.key[i]];
+                    values.push(value);
                 }
-                return [true, values]
+                return [true, values];
             }
-            let value = typeof this._platformStorageCachedData[params.key] === 'undefined' ? null : this._platformStorageCachedData[params.key]
-            return [true, value]
+            const value = typeof this._platformStorageCachedData[params.key] === 'undefined' ? null : this._platformStorageCachedData[params.key];
+            return [true, value];
         }
         return [false, null];
     }
@@ -162,7 +163,7 @@ export class BaseSdk {
         const keys = Object.keys(this._localStorage);
         this.get_data_from_storage({ key: keys }, (status, data_arr) => {
             if (status) {
-                this._platformStorageCachedData = {}
+                this._platformStorageCachedData = {};
                 for (let i = 0; i < keys.length; i++) {
                     this._platformStorageCachedData[keys[i]] = data_arr[i];
                 }
@@ -173,29 +174,29 @@ export class BaseSdk {
 
     get_data_from_storage(params: { key: string | string[] }, cb: CbResultData, use_cache = false) {
         if (!this._localStorage) {
-            this.error('localStorage is not supported')
+            this.error('localStorage is not supported');
             return cb(false, null);
         }
         if (Array.isArray(params.key)) {
-            let values = []
+            const values = [];
             for (let i = 0; i < params.key.length; i++) {
-                values.push(this._get_data_from_local_storage(params.key[i]))
+                values.push(this._get_data_from_local_storage(params.key[i]));
             }
             return cb(true, values);
         }
-        let value = this._get_data_from_local_storage(params.key)
+        const value = this._get_data_from_local_storage(params.key);
         return cb(true, value);
     }
 
     set_data_to_storage(params: { key: string | string[], value: any }, cb: CbResultVal) {
         if (!this._localStorage) {
-            this.error('localStorage is not supported')
+            this.error('localStorage is not supported');
             return cb(false);
         }
 
         if (Array.isArray(params.key)) {
             for (let i = 0; i < params.key.length; i++) {
-                this._set_data_to_local_storage(params.key[i], params.value[i])
+                this._set_data_to_local_storage(params.key[i], params.value[i]);
             }
             return cb(true);
         }
@@ -206,18 +207,18 @@ export class BaseSdk {
 
     delete_data_from_storage(params: { key: string | string[] }, cb: CbResultVal) {
         if (!this._localStorage) {
-            this.error('localStorage is not supported')
+            this.error('localStorage is not supported');
             return cb(false);
         }
 
         if (Array.isArray(params.key)) {
             for (let i = 0; i < params.key.length; i++) {
-                this._delete_data_from_local_storage(params.key[i])
+                this._delete_data_from_local_storage(params.key[i]);
             }
             return cb(true);
         }
 
-        this._delete_data_from_local_storage(params.key)
+        this._delete_data_from_local_storage(params.key);
         return cb(true);
     }
 
@@ -252,7 +253,7 @@ export class BaseSdk {
                 this.log('migrate failed');
                 cb(false);
             }
-        }, false)
+        }, false);
     }
 
     // social
@@ -289,30 +290,30 @@ export class BaseSdk {
 
     _set_interstitial_state(state: INTERSTITIAL_STATE) {
         if (this._interstitialState === state && state !== INTERSTITIAL_STATE.FAILED) {
-            return
+            return;
         }
 
-        this._interstitialState = state
+        this._interstitialState = state;
         if (this.cb_interstitial_state)
             this.cb_interstitial_state(this._interstitialState);
     }
 
     _set_rewarded_state(state: REWARDED_STATE) {
         if (this._rewardedState === state && state !== REWARDED_STATE.FAILED) {
-            return
+            return;
         }
 
-        this._rewardedState = state
+        this._rewardedState = state;
         if (this.cb_rewarded_state)
             this.cb_rewarded_state(this._rewardedState);
     }
 
     _setBannerState(state: BANNER_STATE) {
         if (this._bannerState === state && state !== BANNER_STATE.FAILED) {
-            return
+            return;
         }
 
-        this._bannerState = state
+        this._bannerState = state;
         if (this.cb_banner_state)
             this.cb_banner_state(this._bannerState);
     }
@@ -354,11 +355,11 @@ export class BaseSdk {
     check_ad_block() {
         this._check_ad_block().then((result) => {
             this._has_ad_block = result as number == 1;
-        })
+        });
     }
 
     has_ad_block() {
-        return this._has_ad_block
+        return this._has_ad_block;
     }
 
     // bind events
@@ -368,15 +369,15 @@ export class BaseSdk {
     }
 
     bind_interstitial_events(params: any, cb: CbInterstitialState) {
-        this.cb_interstitial_state = cb
+        this.cb_interstitial_state = cb;
     }
 
     bind_banner_events(params: any, cb: CbBannerState) {
-        this.cb_banner_state = cb
+        this.cb_banner_state = cb;
     }
 
     bind_rewarded_events(params: any, cb: CbRewardedState) {
-        this.cb_rewarded_state = cb
+        this.cb_rewarded_state = cb;
     }
 
 

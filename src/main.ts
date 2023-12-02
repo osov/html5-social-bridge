@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { CbResultVal } from "./types";
 import { BaseSdk } from "./BaseSdk";
 import { YandexSdk } from "./yandex";
@@ -21,7 +24,7 @@ import { VkSdk } from "./vk";
     }
 
 
-    const url = new URL(window.location.href)
+    const url = new URL(window.location.href);
     if (url.hostname.includes('yandex') || url.hash.includes('yandex'))
         sdk = new YandexSdk(do_ready);
     else if (url.searchParams.has('api_id') && url.searchParams.has('viewer_id') && url.searchParams.has('auth_key'))
@@ -31,4 +34,4 @@ import { VkSdk } from "./vk";
     else
         sdk = new BaseSdk(do_ready, true);
 
-}
+};

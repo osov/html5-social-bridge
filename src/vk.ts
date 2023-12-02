@@ -2,7 +2,7 @@ import { BaseSdk } from "./BaseSdk";
 import { BANNER_STATE, CbResultData, CbResultVal, INTERSTITIAL_STATE, REWARDED_STATE } from "./types";
 import { addJavaScript } from "./utils";
 
-const SDK_URL = 'https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js'
+const SDK_URL = 'https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
 
 export class VkSdk extends BaseSdk {
     _platformId = 'vk';
@@ -13,35 +13,35 @@ export class VkSdk extends BaseSdk {
     constructor(cb_ready: CbResultVal) {
         super(() => { });
 
-        let url = new URL(window.location.href)
+        const url = new URL(window.location.href);
         if (url.searchParams.has('platform')) {
-            this.platform = url.searchParams.get('platform')
+            this.platform = url.searchParams.get('platform');
         }
         addJavaScript(SDK_URL).then(() => {
             this._platformSdk = (window as any).vkBridge;
 
             this._platformSdk.send('VKWebAppInit').then(() => {
-                this._isBannerSupported = true
+                this._isBannerSupported = true;
 
                 this._platformSdk.send('VKWebAppGetUserInfo')
                     .then(data => {
                         if (data) {
-                            this._playerId = data['id']
-                            this._playerName = data['first_name'] + ' ' + data['last_name']
+                            this._playerId = data['id'];
+                            this._playerName = (data['first_name'] as string) + ' ' + (data['last_name'] as string);
 
                             if (data['photo_100'])
-                                this._playerPhotos.push(data['photo_100'])
+                                this._playerPhotos.push(data['photo_100']);
                             if (data['photo_200'])
-                                this._playerPhotos.push(data['photo_200'])
+                                this._playerPhotos.push(data['photo_200']);
                             if (data['photo_max_orig'])
-                                this._playerPhotos.push(data['photo_max_orig'])
+                                this._playerPhotos.push(data['photo_max_orig']);
                         }
                     })
                     .finally(() => {
                         this.load_all_data_from_storage(cb_ready);
-                    })
+                    });
 
-            })
+            });
             if (this.platform == '') {
                 this._platformSdk.send('VKWebAppGetClientVersion')
                     .then((result) => {
@@ -53,7 +53,7 @@ export class VkSdk extends BaseSdk {
                         this.error(error);
                     });
             }
-        })
+        });
     }
 
 
@@ -62,7 +62,7 @@ export class VkSdk extends BaseSdk {
     }
 
     is_share_supported() {
-        return true
+        return true;
     }
 
     send_request_to_vk_bridge(actionName, vkMethodName, parameters = {}, responseSuccessKey = 'result') {
@@ -70,47 +70,47 @@ export class VkSdk extends BaseSdk {
             this._platformSdk.send(vkMethodName, parameters)
                 .then(data => {
                     if (data[responseSuccessKey])
-                        resolve(true)
+                        resolve(true);
                     else
-                        resolve(false)
+                        resolve(false);
                 })
                 .catch(error => {
                     this.error(error);
-                    resolve(false)
-                })
-        })
+                    resolve(false);
+                });
+        });
     }
 
     get_language() {
-        let url = new URL(window.location.href)
+        const url = new URL(window.location.href);
         if (url.searchParams.has('language')) {
-            let language: number | string = url.searchParams.get('language')
-            try { language = parseInt(language) }
+            let language: number | string = url.searchParams.get('language');
+            try { language = parseInt(language); }
             catch (e) { }
 
             switch (language) {
                 case 0: {
-                    return 'ru'
+                    return 'ru';
                 }
                 case 1: {
-                    return 'uk'
+                    return 'uk';
                 }
                 case 2: {
-                    return 'be'
+                    return 'be';
                 }
                 case 3: {
-                    return 'en'
+                    return 'en';
                 }
             }
         }
 
-        return super.get_language()
+        return super.get_language();
     }
 
     get_payload() {
-        let url = new URL(window.location.href)
+        const url = new URL(window.location.href);
         if (url.searchParams.has('hash'))
-            return url.searchParams.get('hash')
+            return url.searchParams.get('hash');
         return super.get_payload();
     }
 
@@ -129,12 +129,12 @@ export class VkSdk extends BaseSdk {
                     }, false);
                 }
                 else
-                    return cb(false)
+                    return cb(false);
             })
             .catch(error => {
-                this.error(error)
+                this.error(error);
                 cb(false);
-            })
+            });
     }
 
     get_data_from_storage(params: { key: string | string[] }, cb: CbResultData, use_cache = false) {
@@ -144,7 +144,7 @@ export class VkSdk extends BaseSdk {
                 return cb(true, tmp[1]);
             }
         }
-        let keys = Array.isArray(params.key) ? params.key : [params.key];
+        const keys = Array.isArray(params.key) ? params.key : [params.key];
 
         this._platformSdk.send('VKWebAppStorageGet', { keys })
             .then(data => {
@@ -159,7 +159,7 @@ export class VkSdk extends BaseSdk {
                             tmp[kv.key] = this.decode_storage_value(kv.value);
                     }
 
-                    let values = []
+                    const values = [];
                     for (let i = 0; i < params.key.length; i++)
                         values.push(tmp[params.key[i]]);
                     return cb(true, values);
@@ -168,38 +168,38 @@ export class VkSdk extends BaseSdk {
             })
             .catch(error => {
                 if (error && error.error_data && error.error_data.error_reason)
-                    this.error(error.error_data.error_reason)
+                    this.error(error.error_data.error_reason);
                 cb(false, null);
-            })
+            });
     }
 
     _set_key_val_to_storage(params: { key: string, value: any }, cb: CbResultVal) {
         // заносим сразу чтобы можно было мгновенно в ответе знать результат
         if (this._platformStorageCachedData != null)
-            this._platformStorageCachedData[params.key] = params.value
+            this._platformStorageCachedData[params.key] = params.value;
         this._platformSdk.send('VKWebAppStorageSet', { key: params.key, value: this.encode_storage_value(params.value) })
             .then(() => {
-                cb(true)
+                cb(true);
             })
             .catch(error => {
                 if (error && error.error_data && error.error_data.error_reason)
-                    this.error(error.error_data.error_reason)
-                cb(false)
-            })
+                    this.error(error.error_data.error_reason);
+                cb(false);
+            });
     }
 
     _set_key_val_to_storage_promise(params: { key: string, value: any }) {
         return new Promise((resolve, reject) => {
             this._set_key_val_to_storage(params, resolve);
-        })
+        });
     }
 
     set_data_to_storage(params: { key: string | string[], value: any }, cb: CbResultVal) {
         if (Array.isArray(params.key)) {
-            let promises = []
+            const promises = [];
             for (let i = 0; i < params.key.length; i++) {
-                let data = { key: params.key[i], value: params.value[i] }
-                promises.push(this._set_key_val_to_storage_promise(data))
+                const data = { key: params.key[i], value: params.value[i] };
+                promises.push(this._set_key_val_to_storage_promise(data));
             }
             Promise.all(promises).then(() => cb(true));
         } else {
@@ -210,10 +210,10 @@ export class VkSdk extends BaseSdk {
 
     delete_data_from_storage(params: { key: string }, cb: CbResultVal) {
         if (Array.isArray(params.key)) {
-            let promises = []
+            const promises = [];
             for (let i = 0; i < params.key.length; i++)
-                promises.push(this._set_key_val_to_storage_promise({ key: params.key[i], value: '' }))
-            Promise.all(promises).then(() => cb(true))
+                promises.push(this._set_key_val_to_storage_promise({ key: params.key[i], value: '' }));
+            Promise.all(promises).then(() => cb(true));
         } else {
             return this.set_data_to_storage({ key: params.key, value: '' }, cb);
         }
@@ -221,13 +221,13 @@ export class VkSdk extends BaseSdk {
 
 
     share(params: { link: string }, cb: CbResultVal) {
-        let parameters: any = {}
+        const parameters: any = {};
         if (params && params.link)
-            parameters.link = params.link
+            parameters.link = params.link;
         this.send_request_to_vk_bridge('share', 'VKWebAppShare', parameters, 'type')
             .then((r: boolean) => {
                 cb(r);
-            })
+            });
     }
 
 
@@ -235,39 +235,39 @@ export class VkSdk extends BaseSdk {
         this.send_request_to_vk_bridge('add_to_favorites', 'VKWebAppAddToFavorites')
             .then((r: boolean) => {
                 cb(r);
-            })
+            });
     }
 
     show_banner(params?: any) {
-        let position = 'bottom'
-        let layoutType = 'resize'
-        let canClose = false
+        let position = 'bottom';
+        let layoutType = 'resize';
+        let canClose = false;
 
         if (params) {
             if (typeof params.position === 'string') {
-                position = params.position
+                position = params.position;
             }
 
             if (typeof params.layoutType === 'string') {
-                layoutType = params.layoutType
+                layoutType = params.layoutType;
             }
 
             if (typeof params.canClose === 'boolean') {
-                canClose = params.canClose
+                canClose = params.canClose;
             }
         }
 
         this._platformSdk.send('VKWebAppShowBannerAd', { 'banner_location': position, 'layout_type': layoutType, 'can_close': canClose })
             .then(data => {
                 if (data.result) {
-                    this._setBannerState(BANNER_STATE.SHOWN)
+                    this._setBannerState(BANNER_STATE.SHOWN);
                 } else {
-                    this._setBannerState(BANNER_STATE.FAILED)
+                    this._setBannerState(BANNER_STATE.FAILED);
                 }
             })
             .catch(error => {
-                this._setBannerState(BANNER_STATE.FAILED)
-            })
+                this._setBannerState(BANNER_STATE.FAILED);
+            });
     }
 
 
@@ -275,9 +275,9 @@ export class VkSdk extends BaseSdk {
         this._platformSdk.send('VKWebAppHideBannerAd')
             .then(data => {
                 if (data.result) {
-                    this._setBannerState(BANNER_STATE.HIDDEN)
+                    this._setBannerState(BANNER_STATE.HIDDEN);
                 }
-            })
+            });
     }
 
     show_interstitial() {
@@ -285,19 +285,19 @@ export class VkSdk extends BaseSdk {
             .send('VKWebAppCheckNativeAds', { ad_format: 'interstitial' })
             .then(data => {
                 if (data.result) {
-                    this._set_interstitial_state(INTERSTITIAL_STATE.OPENED)
+                    this._set_interstitial_state(INTERSTITIAL_STATE.OPENED);
                 }
             })
             .finally(() => {
                 this._platformSdk
                     .send('VKWebAppShowNativeAds', { ad_format: 'interstitial' })
                     .then(data => {
-                        this._set_interstitial_state(data.result ? INTERSTITIAL_STATE.CLOSED : INTERSTITIAL_STATE.FAILED)
+                        this._set_interstitial_state(data.result ? INTERSTITIAL_STATE.CLOSED : INTERSTITIAL_STATE.FAILED);
                     })
                     .catch(() => {
-                        this._set_interstitial_state(INTERSTITIAL_STATE.FAILED)
-                    })
-            })
+                        this._set_interstitial_state(INTERSTITIAL_STATE.FAILED);
+                    });
+            });
     }
 
     show_rewarded() {
@@ -305,7 +305,7 @@ export class VkSdk extends BaseSdk {
             .send('VKWebAppCheckNativeAds', { ad_format: 'reward', use_waterfall: true })
             .then(data => {
                 if (data.result) {
-                    this._set_rewarded_state(REWARDED_STATE.OPENED)
+                    this._set_rewarded_state(REWARDED_STATE.OPENED);
                 }
             })
             .finally(() => {
@@ -313,16 +313,16 @@ export class VkSdk extends BaseSdk {
                     .send('VKWebAppShowNativeAds', { ad_format: 'reward', use_waterfall: true })
                     .then(data => {
                         if (data.result) {
-                            this._set_rewarded_state(REWARDED_STATE.REWARDED)
-                            this._set_rewarded_state(REWARDED_STATE.CLOSED)
+                            this._set_rewarded_state(REWARDED_STATE.REWARDED);
+                            this._set_rewarded_state(REWARDED_STATE.CLOSED);
                         } else {
-                            this._set_rewarded_state(REWARDED_STATE.FAILED)
+                            this._set_rewarded_state(REWARDED_STATE.FAILED);
                         }
                     })
                     .catch(() => {
-                        this._set_rewarded_state(REWARDED_STATE.FAILED)
-                    })
-            })
+                        this._set_rewarded_state(REWARDED_STATE.FAILED);
+                    });
+            });
     }
 
 }

@@ -3,7 +3,7 @@ import { addJavaScript } from "./utils";
 import { CbLeaderboardList, CbResultData, CbResultVal, INTERSTITIAL_STATE, REWARDED_STATE } from "./types";
 import { BaseSdk } from "./BaseSdk";
 
-const SDK_URL = 'https://yandex.ru/games/sdk/v2'
+const SDK_URL = 'https://yandex.ru/games/sdk/v2';
 
 export class YandexSdk extends BaseSdk {
     _platformId = 'yandex';
@@ -18,74 +18,74 @@ export class YandexSdk extends BaseSdk {
             .then(() => {
                 YaGames.init()
                     .then(sdk => {
-                        this._platformSdk = sdk
+                        this._platformSdk = sdk;
 
                         const getPlayerPromise = new Promise((resolve, reject) => {
                             this.get_player({}, resolve);
                         });
 
-                        let getLeaderboardsPromise = this._platformSdk.getLeaderboards()
-                            .then(lb => this._leaderboards = lb)
+                        const getLeaderboardsPromise = this._platformSdk.getLeaderboards()
+                            .then(lb => this._leaderboards = lb);
 
-                        let getSafeStoragePromise = this._platformSdk.getStorage()
+                        const getSafeStoragePromise = this._platformSdk.getStorage()
                             .then((safeStorage) => {
                                 this._localStorage = safeStorage;
-                            })
+                            });
 
                         Promise.all([getPlayerPromise, getLeaderboardsPromise, getSafeStoragePromise])
                             .finally(() => {
                                 // todo хранилище доступно даже если не авторизован ^_^ 
                                 this.load_all_data_from_storage(cb_ready);
-                            })
-                    })
-            })
+                            });
+                    });
+            });
     }
 
     get_platform_tld() {
         if (this._platformSdk)
-            return this._platformSdk.environment.i18n.tld.toLowerCase()
+            return this._platformSdk.environment.i18n.tld.toLowerCase();
         return super.get_platform_tld();
     }
 
     get_language() {
         if (this._platformSdk)
-            return this._platformSdk.environment.i18n.lang.toLowerCase()
+            return this._platformSdk.environment.i18n.lang.toLowerCase();
         return super.get_language();
     }
 
     get_player(options: any, cb: CbResultVal) {
-        let parameters = {
+        const parameters = {
             scopes: false
-        }
+        };
 
         if (options && typeof options.scopes === 'boolean')
-            parameters.scopes = options.scopes
+            parameters.scopes = options.scopes;
 
 
         this._platformSdk.getPlayer(parameters)
             .then(player => {
-                this._playerId = player.getUniqueID()
-                this._isPlayerAuthorized = player.getMode() !== 'lite'
+                this._playerId = player.getUniqueID();
+                this._isPlayerAuthorized = player.getMode() !== 'lite';
 
-                let name = player.getName()
+                const name = player.getName();
                 if (name !== '')
-                    this._playerName = name
+                    this._playerName = name;
 
 
-                this._playerPhotos = []
-                let photoSmall = player.getPhoto('small')
-                let photoMedium = player.getPhoto('medium')
-                let photoLarge = player.getPhoto('large')
+                this._playerPhotos = [];
+                const photoSmall = player.getPhoto('small');
+                const photoMedium = player.getPhoto('medium');
+                const photoLarge = player.getPhoto('large');
 
                 if (photoSmall)
-                    this._playerPhotos.push(photoSmall)
+                    this._playerPhotos.push(photoSmall);
                 if (photoMedium)
-                    this._playerPhotos.push(photoMedium)
+                    this._playerPhotos.push(photoMedium);
                 if (photoLarge)
-                    this._playerPhotos.push(photoLarge)
-                this._yandexPlayer = player
+                    this._playerPhotos.push(photoLarge);
+                this._yandexPlayer = player;
             })
-            .finally(() => cb(true))
+            .finally(() => cb(true));
     }
 
     authorize_player(options: any, cb: CbResultVal) {
@@ -99,25 +99,25 @@ export class YandexSdk extends BaseSdk {
                 .catch(error => {
                     this.error(error);
                     cb(false);
-                })
+                });
         }
     }
 
     load_all_data_from_storage(cb: CbResultVal) {
-        this._platformStorageCachedData = {}
+        this._platformStorageCachedData = {};
         if (this._yandexPlayer) {
             this._yandexPlayer.getData()
                 .then(data => {
-                    this._platformStorageCachedData = data
-                    cb(true)
+                    this._platformStorageCachedData = data;
+                    cb(true);
                 })
                 .catch(error => {
                     this.error(error);
-                    cb(false)
-                })
+                    cb(false);
+                });
         }
         else
-            cb(false)
+            cb(false);
     }
 
     get_data_from_storage(params: { key: string | string[] }, cb: CbResultData, use_cache = false) {
@@ -131,21 +131,21 @@ export class YandexSdk extends BaseSdk {
         if (this._yandexPlayer) {
             this._yandexPlayer.getData()
                 .then(data => {
-                    this._platformStorageCachedData = data
+                    this._platformStorageCachedData = data;
                     if (Array.isArray(params.key)) {
-                        let values = []
+                        const values = [];
                         for (let i = 0; i < params.key.length; i++) {
-                            let value = typeof this._platformStorageCachedData[params.key[i]] === 'undefined' ? null : this._platformStorageCachedData[params.key[i]]
-                            values.push(value)
+                            const value = typeof this._platformStorageCachedData[params.key[i]] === 'undefined' ? null : this._platformStorageCachedData[params.key[i]];
+                            values.push(value);
                         }
-                        return cb(true, values)
+                        return cb(true, values);
                     }
-                    return cb(true, typeof this._platformStorageCachedData[params.key] === 'undefined' ? null : this._platformStorageCachedData[params.key])
+                    return cb(true, typeof this._platformStorageCachedData[params.key] === 'undefined' ? null : this._platformStorageCachedData[params.key]);
                 })
                 .catch(error => {
                     this.error(error);
-                    cb(false, null)
-                })
+                    cb(false, null);
+                });
         } else {
             super.get_data_from_storage(params, cb, use_cache);
         }
@@ -154,28 +154,28 @@ export class YandexSdk extends BaseSdk {
 
     set_data_to_storage(params: { key: string | string[], value: any }, cb: CbResultVal) {
         if (this._yandexPlayer) {
-            let data = this._platformStorageCachedData !== null ? { ...this._platformStorageCachedData } : {}
+            const data = this._platformStorageCachedData !== null ? { ...this._platformStorageCachedData } : {};
             if (Array.isArray(params.key)) {
                 for (let i = 0; i < params.key.length; i++) {
-                    data[params.key[i]] = params.value[i]
+                    data[params.key[i]] = params.value[i];
                     if (this._platformStorageCachedData != null)
-                        this._platformStorageCachedData[params.key[i]] = params.value[i]
+                        this._platformStorageCachedData[params.key[i]] = params.value[i];
                 }
             } else {
-                data[params.key] = params.value
+                data[params.key] = params.value;
                 if (this._platformStorageCachedData != null)
-                    this._platformStorageCachedData[params.key] = params.value
+                    this._platformStorageCachedData[params.key] = params.value;
             }
 
             this._yandexPlayer.setData(data)
                 .then(() => {
-                    this._platformStorageCachedData = data
-                    cb(true)
+                    this._platformStorageCachedData = data;
+                    cb(true);
                 })
                 .catch(error => {
                     this.error(error);
-                    cb(false)
-                })
+                    cb(false);
+                });
         } else {
             // для неавторизованного, но у которого возможно есть safeStorage
             super.set_data_to_storage(params, cb);
@@ -184,23 +184,23 @@ export class YandexSdk extends BaseSdk {
 
     delete_data_from_storage(params: { key: string }, cb: CbResultVal) {
         if (this._yandexPlayer) {
-            let data = this._platformStorageCachedData !== null ? { ...this._platformStorageCachedData } : {}
+            const data = this._platformStorageCachedData !== null ? { ...this._platformStorageCachedData } : {};
             if (Array.isArray(params.key)) {
                 for (let i = 0; i < params.key.length; i++)
-                    delete data[params.key[i]]
+                    delete data[params.key[i]];
             }
             else
-                delete data[params.key]
+                delete data[params.key];
 
             this._yandexPlayer.setData(data)
                 .then(() => {
-                    this._platformStorageCachedData = data
-                    cb(true)
+                    this._platformStorageCachedData = data;
+                    cb(true);
                 })
                 .catch(error => {
                     this.error(error);
-                    cb(false)
-                })
+                    cb(false);
+                });
         } else {
             super.delete_data_from_storage(params, cb);
         }
@@ -214,23 +214,23 @@ export class YandexSdk extends BaseSdk {
                         .then(({ feedbackSent }) => {
                             if (feedbackSent) {
                                 cb(true);
-                                return
+                                return;
                             }
                             cb(false);
                         })
                         .catch(error => {
                             this.error(error);
                             cb(false);
-                        })
-                    return
+                        });
+                    return;
                 }
-                this.error(result.reason)
+                this.error(result.reason);
                 cb(false);
             })
             .catch(error => {
                 this.error(error);
                 cb(false);
-            })
+            });
     }
 
     set_leaderboard_score(params: { leaderboardName: string, score: number, extraData?: any }, cb: CbResultVal) {
@@ -244,7 +244,7 @@ export class YandexSdk extends BaseSdk {
         }
 
         if (typeof params.score === 'string')
-            params.score = parseInt(params.score)
+            params.score = parseInt(params.score);
 
 
         this._leaderboards.setLeaderboardScore(params.leaderboardName, params.score, params.extraData)
@@ -254,7 +254,7 @@ export class YandexSdk extends BaseSdk {
             .catch(error => {
                 this.error(error);
                 cb(false);
-            })
+            });
     }
 
     get_leaderboard_score(params: { leaderboardName: string }, cb: CbResultData) {
@@ -269,49 +269,49 @@ export class YandexSdk extends BaseSdk {
 
         this._leaderboards.getLeaderboardPlayerEntry(params.leaderboardName)
             .then(result => {
-                cb(true, result.score)
+                cb(true, result.score);
             })
             .catch(error => {
                 this.error(error);
                 cb(false);
-            })
+            });
     }
 
     get_leaderboard_entries(params: { leaderboardName: string, includeUser?: boolean, quantityAround?: number, quantityTop?: number }, cb: CbLeaderboardList) {
         if (!this._leaderboards || !params || !params.leaderboardName)
             return cb(false, []);
 
-        let parameters = {
+        const parameters = {
             includeUser: false,
             quantityAround: 5,
             quantityTop: 5
-        }
+        };
         if (typeof params.includeUser === 'boolean')
-            parameters.includeUser = params.includeUser
+            parameters.includeUser = params.includeUser;
         if (typeof params.quantityAround === 'string')
-            params.quantityAround = parseInt(params.quantityAround)
+            params.quantityAround = parseInt(params.quantityAround);
         if (typeof params.quantityAround === 'number')
-            parameters.quantityAround = params.quantityAround
+            parameters.quantityAround = params.quantityAround;
         if (typeof params.quantityTop === 'string')
-            params.quantityTop = parseInt(params.quantityTop)
+            params.quantityTop = parseInt(params.quantityTop);
         if (typeof params.quantityTop === 'number')
-            parameters.quantityTop = params.quantityTop
+            parameters.quantityTop = params.quantityTop;
 
         this._leaderboards.getLeaderboardEntries(params.leaderboardName, parameters)
             .then(result => {
-                let entries = null
+                let entries = null;
 
                 if (result && result.entries.length > 0) {
                     entries = result.entries.map(e => {
-                        let photos = []
-                        let photoSmall = e.player.getAvatarSrc('small')
-                        let extraData = ''
-                        let isUser = e.rank == result.userRank
+                        const photos = [];
+                        const photoSmall = e.player.getAvatarSrc('small');
+                        let extraData = '';
+                        const isUser = e.rank == result.userRank;
                         if (e.extraData != undefined)
-                            extraData = e.extraData
+                            extraData = e.extraData;
 
                         if (photoSmall)
-                            photos.push(photoSmall)
+                            photos.push(photoSmall);
 
                         return {
                             id: e.player.uniqueID,
@@ -321,8 +321,8 @@ export class YandexSdk extends BaseSdk {
                             photos,
                             extraData,
                             isUser
-                        }
-                    })
+                        };
+                    });
                 }
 
                 cb(true, entries);
@@ -330,7 +330,7 @@ export class YandexSdk extends BaseSdk {
             .catch(error => {
                 this.error(error);
                 cb(false, []);
-            })
+            });
 
     }
 
@@ -338,36 +338,36 @@ export class YandexSdk extends BaseSdk {
         this._platformSdk.adv.showFullscreenAdv({
             callbacks: {
                 onOpen: () => {
-                    this._set_interstitial_state(INTERSTITIAL_STATE.OPENED)
+                    this._set_interstitial_state(INTERSTITIAL_STATE.OPENED);
                 },
                 onClose: wasShown => {
                     if (wasShown) {
-                        this._set_interstitial_state(INTERSTITIAL_STATE.CLOSED)
+                        this._set_interstitial_state(INTERSTITIAL_STATE.CLOSED);
                     } else {
-                        this._set_interstitial_state(INTERSTITIAL_STATE.FAILED)
+                        this._set_interstitial_state(INTERSTITIAL_STATE.FAILED);
                     }
                 }
             }
-        })
+        });
     }
 
     show_rewarded() {
         this._platformSdk.adv.showRewardedVideo({
             callbacks: {
                 onOpen: () => {
-                    this._set_rewarded_state(REWARDED_STATE.OPENED)
+                    this._set_rewarded_state(REWARDED_STATE.OPENED);
                 },
                 onRewarded: () => {
-                    this._set_rewarded_state(REWARDED_STATE.REWARDED)
+                    this._set_rewarded_state(REWARDED_STATE.REWARDED);
                 },
                 onClose: () => {
-                    this._set_rewarded_state(REWARDED_STATE.CLOSED)
+                    this._set_rewarded_state(REWARDED_STATE.CLOSED);
                 },
                 onError: error => {
-                    this._set_rewarded_state(REWARDED_STATE.FAILED)
+                    this._set_rewarded_state(REWARDED_STATE.FAILED);
                 }
             }
-        })
+        });
     }
 
 
