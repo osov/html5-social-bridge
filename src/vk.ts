@@ -11,52 +11,49 @@ export class VkSdk extends BaseSdk {
 
 
     constructor(cb_ready: CbResultVal) {
-        super(() => { })
+        super(() => { });
 
         let url = new URL(window.location.href)
         if (url.searchParams.has('platform')) {
             this.platform = url.searchParams.get('platform')
         }
-        else
+        addJavaScript(SDK_URL).then(() => {
+            this._platformSdk = (window as any).vkBridge;
 
-            addJavaScript(SDK_URL).then(() => {
-                this._platformSdk = (window as any).vkBridge;
+            this._platformSdk.send('VKWebAppInit').then(() => {
+                this._isBannerSupported = true
 
+                this._platformSdk.send('VKWebAppGetUserInfo')
+                    .then(data => {
+                        if (data) {
+                            this._playerId = data['id']
+                            this._playerName = data['first_name'] + ' ' + data['last_name']
 
-                this._platformSdk.send('VKWebAppInit').then(() => {
-                    this._isBannerSupported = true
+                            if (data['photo_100'])
+                                this._playerPhotos.push(data['photo_100'])
+                            if (data['photo_200'])
+                                this._playerPhotos.push(data['photo_200'])
+                            if (data['photo_max_orig'])
+                                this._playerPhotos.push(data['photo_max_orig'])
+                        }
+                    })
+                    .finally(() => {
+                        this.load_all_data_from_storage(cb_ready);
+                    })
 
-                    this._platformSdk.send('VKWebAppGetUserInfo')
-                        .then(data => {
-                            if (data) {
-                                this._playerId = data['id']
-                                this._playerName = data['first_name'] + ' ' + data['last_name']
-
-                                if (data['photo_100'])
-                                    this._playerPhotos.push(data['photo_100'])
-                                if (data['photo_200'])
-                                    this._playerPhotos.push(data['photo_200'])
-                                if (data['photo_max_orig'])
-                                    this._playerPhotos.push(data['photo_max_orig'])
-                            }
-                        })
-                        .finally(() => {
-                            this.load_all_data_from_storage(cb_ready);
-                        })
-
-                })
-                if (this.platform == '') {
-                    this._platformSdk.send('VKWebAppGetClientVersion')
-                        .then((result) => {
-                            if (result) {
-                                this.platform = result.platform;
-                            }
-                        })
-                        .catch((error) => {
-                            this.error(error);
-                        });
-                }
             })
+            if (this.platform == '') {
+                this._platformSdk.send('VKWebAppGetClientVersion')
+                    .then((result) => {
+                        if (result) {
+                            this.platform = result.platform;
+                        }
+                    })
+                    .catch((error) => {
+                        this.error(error);
+                    });
+            }
+        })
     }
 
 
@@ -72,14 +69,14 @@ export class VkSdk extends BaseSdk {
         return new Promise((resolve, reject) => {
             this._platformSdk.send(vkMethodName, parameters)
                 .then(data => {
-                    if (data[responseSuccessKey]) {
-                        resolve(actionName)
-                    }
+                    if (data[responseSuccessKey])
+                        resolve(true)
                     else
-                        reject(actionName)
+                        resolve(false)
                 })
                 .catch(error => {
-                    reject(actionName + error)
+                    this.error(error);
+                    resolve(false)
                 })
         })
     }
@@ -118,18 +115,18 @@ export class VkSdk extends BaseSdk {
     }
 
     load_all_data_from_storage(cb: CbResultVal) {
+        this._platformStorageCachedData = {}; // инициализируем тут, иначе не будет работать получение/установка кеш ключа
         this._platformSdk.send('VKWebAppStorageGetKeys', { count: 50, offset: 0 })
             .then(data => {
                 if (data.keys.length > 0) {
                     this.get_data_from_storage({ key: data.keys }, (result, data_arr) => {
                         if (result) {
-                            this._platformStorageCachedData = {};
                             for (let i = 0; i < data.keys.length; i++) {
                                 this._platformStorageCachedData[data.keys[i]] = data_arr[i];
                             }
                         }
                         cb(result);
-                    });
+                    }, false);
                 }
                 else
                     return cb(false)
@@ -140,45 +137,48 @@ export class VkSdk extends BaseSdk {
             })
     }
 
-    get_data_from_storage(params: { key: string | string[] }, cb: CbResultData) {
-        const tmp = this._get_cached_storage(params);
-        if (tmp[0] === true) {
-            return cb(true, tmp[1]);
+    get_data_from_storage(params: { key: string | string[] }, cb: CbResultData, use_cache = false) {
+        if (use_cache) {
+            const tmp = this._get_cached_storage(params);
+            if (tmp[0] === true) {
+                return cb(true, tmp[1]);
+            }
         }
+        let keys = Array.isArray(params.key) ? params.key : [params.key];
 
-        let keys = Array.isArray(params.key) ? params.key : [params.key]
         this._platformSdk.send('VKWebAppStorageGet', { keys })
             .then(data => {
                 if (Array.isArray(params.key)) {
-                    let values = []
-
-                    for (let i = 0; i < params.key.length; i++) {
-                        if (data.keys[i].value === '') {
-                            values.push(null)
-                            continue
-                        }
-                        values.push(this.decode_storage_value(data.keys[i].value))
+                    // тут другой порядок ключей в ответе может быть, поэтому нужно правильно преобразовать
+                    const tmp: { [k: string]: any } = {};
+                    for (let i = 0; i < data.keys.length; i++) {
+                        const kv = data.keys[i];
+                        if (kv.value === '')
+                            tmp[kv.key] = null;
+                        else
+                            tmp[kv.key] = this.decode_storage_value(kv.value);
                     }
+
+                    let values = []
+                    for (let i = 0; i < params.key.length; i++)
+                        values.push(tmp[params.key[i]]);
                     return cb(true, values);
                 }
-
-                if (data.keys[0].value === '')
-                    return cb(true, null);
-
-                return cb(true, this.decode_storage_value(data.keys[0].value))
+                return cb(true, data.keys[0].value === '' ? null : this.decode_storage_value(data.keys[0].value));
             })
             .catch(error => {
                 if (error && error.error_data && error.error_data.error_reason)
                     this.error(error.error_data.error_reason)
-                cb(false);
+                cb(false, null);
             })
     }
 
     _set_key_val_to_storage(params: { key: string, value: any }, cb: CbResultVal) {
+        // заносим сразу чтобы можно было мгновенно в ответе знать результат
+        if (this._platformStorageCachedData != null)
+            this._platformStorageCachedData[params.key] = params.value
         this._platformSdk.send('VKWebAppStorageSet', { key: params.key, value: this.encode_storage_value(params.value) })
             .then(() => {
-                if (this._platformStorageCachedData != null)
-                    this._platformStorageCachedData[params.key] = params.value
                 cb(true)
             })
             .catch(error => {
@@ -220,22 +220,22 @@ export class VkSdk extends BaseSdk {
     }
 
 
-    share(params?: any, cb?: CbResultVal) {
+    share(params: { link: string }, cb: CbResultVal) {
         let parameters: any = {}
         if (params && params.link)
             parameters.link = params.link
-        this.send_request_to_vk_bridge('share', 'VKWebAppShare', parameters, 'type').then(() => {
-            if (cb)
-                cb(true);
-        })
+        this.send_request_to_vk_bridge('share', 'VKWebAppShare', parameters, 'type')
+            .then((r: boolean) => {
+                cb(r);
+            })
     }
 
 
-    add_to_favorites(cb?: CbResultVal) {
-        this.send_request_to_vk_bridge('add_to_favorites', 'VKWebAppAddToFavorites').then(() => {
-            if (cb)
-                cb(true);
-        })
+    add_to_favorites(cb: CbResultVal) {
+        this.send_request_to_vk_bridge('add_to_favorites', 'VKWebAppAddToFavorites')
+            .then((r: boolean) => {
+                cb(r);
+            })
     }
 
     show_banner(params?: any) {

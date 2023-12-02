@@ -29,6 +29,6 @@ import { VkSdk } from "./vk";
     else if (url.searchParams.has('web_server') && url.searchParams.has('application_key') && url.searchParams.has('api_server'))
         sdk = new OkSdk(do_ready);
     else
-        sdk = new BaseSdk(do_ready);
+        sdk = new BaseSdk(do_ready, true);
 
 }

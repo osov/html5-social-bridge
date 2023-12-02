@@ -25,7 +25,7 @@ export class BaseSdk {
     protected _bannerState: BANNER_STATE;
 
 
-    constructor(cb_ready: CbResultVal) {
+    constructor(cb_ready: CbResultVal, is_load_data_from_storage = false) {
         try { this._localStorage = window.localStorage } catch (e) { }
         this._visibilityState = document.visibilityState == 'visible';
         document.addEventListener('visibilitychange', () => {
@@ -34,7 +34,8 @@ export class BaseSdk {
             if (this.cb_visible_state)
                 this.cb_visible_state(this._visibilityState);
         });
-        this.load_all_data_from_storage(cb_ready);
+        if (is_load_data_from_storage)
+            this.load_all_data_from_storage(cb_ready);
     }
 
     log(...args) {
@@ -156,10 +157,8 @@ export class BaseSdk {
     }
 
     load_all_data_from_storage(cb: CbResultVal) {
-        if (!this._localStorage) {
-            cb(false);
-            return;
-        }
+        if (!this._localStorage)
+            return cb(false);
         const keys = Object.keys(this._localStorage);
         this.get_data_from_storage({ key: keys }, (status, data_arr) => {
             if (status) {
@@ -169,10 +168,10 @@ export class BaseSdk {
                 }
             }
             cb(status);
-        });
+        }, false);
     }
 
-    get_data_from_storage(params: { key: string | string[] }, cb: CbResultData) {
+    get_data_from_storage(params: { key: string | string[] }, cb: CbResultData, use_cache = false) {
         if (!this._localStorage) {
             this.error('localStorage is not supported')
             return cb(false, null);
@@ -253,7 +252,7 @@ export class BaseSdk {
                 this.log('migrate failed');
                 cb(false);
             }
-        })
+        }, false)
     }
 
     // social

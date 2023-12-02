@@ -104,6 +104,7 @@ export class YandexSdk extends BaseSdk {
     }
 
     load_all_data_from_storage(cb: CbResultVal) {
+        this._platformStorageCachedData = {}
         if (this._yandexPlayer) {
             this._yandexPlayer.getData()
                 .then(data => {
@@ -119,10 +120,12 @@ export class YandexSdk extends BaseSdk {
             cb(false)
     }
 
-    get_data_from_storage(params: { key: string | string[] }, cb: CbResultData) {
-        const tmp = this._get_cached_storage(params);
-        if (tmp[0] === true) {
-            return cb(true, tmp[1]);
+    get_data_from_storage(params: { key: string | string[] }, cb: CbResultData, use_cache = false) {
+        if (use_cache) {
+            const tmp = this._get_cached_storage(params);
+            if (tmp[0] === true) {
+                return cb(true, tmp[1]);
+            }
         }
 
         if (this._yandexPlayer) {
@@ -141,10 +144,10 @@ export class YandexSdk extends BaseSdk {
                 })
                 .catch(error => {
                     this.error(error);
-                    cb(false)
+                    cb(false, null)
                 })
         } else {
-            super.get_data_from_storage(params, cb);
+            super.get_data_from_storage(params, cb, use_cache);
         }
 
     }

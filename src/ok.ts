@@ -188,6 +188,7 @@ export class OkSdk extends BaseSdk {
     }
 
     load_all_data_from_storage(cb: CbResultVal) {
+        this._platformStorageCachedData = {}
         this._platformSdk.Client.call({ "method": "storage.getKeys", scope: 'CUSTOM' }, (status, data, error) => {
             if (status == 'ok' && error == null) {
                 if (data.keys.length == 0) {
@@ -195,13 +196,12 @@ export class OkSdk extends BaseSdk {
                 }
                 this.get_data_from_storage({ key: data.keys }, (result, data_arr) => {
                     if (result) {
-                        this._platformStorageCachedData = {}
                         for (let i = 0; i < data.keys.length; i++) {
                             this._platformStorageCachedData[data.keys[i]] = data_arr[i];
                         }
                     }
                     cb(result);
-                });
+                }, false);
             } else {
                 this.error('status:', status, 'data:', data, 'error:', error);
                 return cb(false);
@@ -210,26 +210,29 @@ export class OkSdk extends BaseSdk {
     }
 
 
-    get_data_from_storage(params: { key: string | string[] }, cb: CbResultData) {
-        const keys = Array.isArray(params.key) ? params.key : [params.key];
-
-        const tmp = this._get_cached_storage(params);
-        if (tmp[0] === true) {
-            return cb(true, tmp[1]);
+    get_data_from_storage(params: { key: string | string[] }, cb: CbResultData, use_cache = false) {
+        if (use_cache) {
+            const tmp = this._get_cached_storage(params);
+            if (tmp[0] === true) {
+                return cb(true, tmp[1]);
+            }
         }
-
+        const keys = Array.isArray(params.key) ? params.key : [params.key];
         this._platformSdk.Client.call({ "method": "storage.get", keys, scope: 'CUSTOM' }, (status, data, error) => {
             if (status == 'ok' && error == null) {
                 if (Array.isArray(params.key)) {
-                    let values = []
-                    for (let i = 0; i < params.key.length; i++) {
-                        let value = typeof this._platformStorageCachedData[params.key[i]] === 'undefined' ? null : this._platformStorageCachedData[params.key[i]]
-                        values.push(this.decode_storage_value(value))
+                    // тут другой порядок ключей в ответе может быть, поэтому нужно правильно преобразовать
+                    const tmp: { [k: string]: any } = {};
+                    for (let k in data.data) {
+                        const value = data.data[k];
+                        tmp[k] = this.decode_storage_value(value);
                     }
-                    return cb(true, values)
+                    let values = []
+                    for (let i = 0; i < params.key.length; i++)
+                        values.push(tmp[params.key[i]]);
+                    return cb(true, values);
                 }
-                let value = typeof this._platformStorageCachedData[params.key] === 'undefined' ? null : this._platformStorageCachedData[params.key];
-                return cb(true, this.decode_storage_value(value))
+                return cb(true, this.decode_storage_value(data.data[params.key]))
             }
             else {
                 this.error('status:', status, 'data:', data, 'error:', error);
@@ -239,10 +242,10 @@ export class OkSdk extends BaseSdk {
     }
 
     _set_key_val_to_storage(params: { key: string, value: any }, cb: CbResultVal) {
+        if (this._platformStorageCachedData != null)
+            this._platformStorageCachedData[params.key] = params.value
         this._platformSdk.Client.call({ "method": "storage.set", key: params.key, value: this.encode_storage_value(params.value) }, (status, data, error) => {
             if (status == 'ok' && error == null) {
-                if (this._platformStorageCachedData != null)
-                    this._platformStorageCachedData[params.key] = params.value
                 cb(true);
             }
             else {
