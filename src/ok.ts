@@ -9,6 +9,7 @@ export class OkSdk extends BaseSdk {
     _platformId = 'ok';
     _platformSdk: any;
     _bannerVisible = false;
+    _isPlayerAuthorized = true;
 
     constructor(cb_ready: CbResultVal) {
         super(() => { });
