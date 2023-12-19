@@ -14,9 +14,9 @@ export class VkSdk extends BaseSdk {
         super(() => { });
 
         const url = new URL(window.location.href);
-        if (url.searchParams.has('platform')) {
+        if (url.searchParams.has('platform'))
             this.platform = url.searchParams.get('platform');
-        }
+
         addJavaScript(SDK_URL).then(() => {
             this._platformSdk = (window as any).vkBridge;
 
@@ -42,17 +42,17 @@ export class VkSdk extends BaseSdk {
                     });
 
             });
-            if (this.platform == '') {
-                this._platformSdk.send('VKWebAppGetClientVersion')
-                    .then((result) => {
-                        if (result) {
-                            this.platform = result.platform;
-                        }
-                    })
-                    .catch((error) => {
-                        this.error(error);
-                    });
-            }
+            // if (this.platform == '') {
+            this._platformSdk.send('VKWebAppGetClientVersion')
+                .then((result) => {
+                    if (result) {
+                        this.platform = result.platform;
+                    }
+                })
+                .catch((error) => {
+                    this.error(error);
+                });
+            // }
         });
     }
 

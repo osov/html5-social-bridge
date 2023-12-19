@@ -298,13 +298,13 @@ export class OkSdk extends BaseSdk {
             return cb(true);
         }
 
-        if (this._platformStorageCachedData['is_first'] == null) {
+        if (this._platformStorageCachedData['is_sound'] == null) {
             this.log('migrate not required ?');
             return cb(true);
         }
 
         // ключ уже в новом формате хранится
-        if (JSON.stringify(this._platformStorageCachedData['is_first']).indexOf('value') == -1) {
+        if (JSON.stringify(this._platformStorageCachedData['is_sound']).indexOf('value') == -1) {
             this.log('migrate not required');
             return cb(true);
         }
