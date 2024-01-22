@@ -263,7 +263,7 @@ export class BaseSdk {
             cb(false);
     }
 
-    rate(cb: CbResultVal) {
+    rate(data: any, cb: CbResultVal) {
         cb(false);
     }
 
@@ -325,9 +325,13 @@ export class BaseSdk {
     }
 
     show_interstitial() {
+        this._set_interstitial_state(INTERSTITIAL_STATE.OPENED);
+        setTimeout(() => this._set_interstitial_state(INTERSTITIAL_STATE.CLOSED), 2000);
     }
 
     show_rewarded() {
+        this._set_rewarded_state(REWARDED_STATE.OPENED);
+        setTimeout(() => this._set_rewarded_state(REWARDED_STATE.CLOSED), 2000);
     }
 
     is_lock_url(url: string, method: string) {

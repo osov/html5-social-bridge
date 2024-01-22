@@ -206,7 +206,7 @@ export class YandexSdk extends BaseSdk {
         }
     }
 
-    rate(cb: CbResultVal) {
+    rate(data: any, cb: CbResultVal) {
         this._platformSdk.feedback.canReview()
             .then(result => {
                 if (result.value) {
