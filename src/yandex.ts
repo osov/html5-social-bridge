@@ -27,12 +27,24 @@ export class YandexSdk extends BaseSdk {
                         const getLeaderboardsPromise = this._platformSdk.getLeaderboards()
                             .then(lb => this._leaderboards = lb);
 
-                        const getSafeStoragePromise = this._platformSdk.getStorage()
-                            .then((safeStorage) => {
-                                this._localStorage = safeStorage;
-                            });
+                        const getSafeStoragePromiseWithFallback = new Promise((resolve, reject) => {
+                            const id_timer = setTimeout(() => {
+                                this.warn('getSafeStoragePromise fallback');
+                                resolve(false);
+                            }, 5000);
 
-                        Promise.all([getPlayerPromise, getLeaderboardsPromise, getSafeStoragePromise])
+                            this._platformSdk.getStorage()
+                                .then((safeStorage) => {
+                                    this._localStorage = safeStorage;
+                                    clearTimeout(id_timer);
+                                    resolve(true);
+                                });
+                        });
+
+
+
+
+                        Promise.all([getPlayerPromise, getLeaderboardsPromise, getSafeStoragePromiseWithFallback])
                             .finally(() => {
                                 // todo хранилище доступно даже если не авторизован ^_^ 
                                 this.load_all_data_from_storage(cb_ready);
