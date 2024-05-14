@@ -10,6 +10,7 @@ export class YandexSdk extends BaseSdk {
     private _leaderboards: YandexGames.Leaderboards;
     private _platformSdk: YandexGames.SDK;
     private _yandexPlayer: YandexGames.Player;
+    private _yandex_payments: YandexGames.Payments;
 
 
     constructor(cb_ready: CbResultVal) {
@@ -40,9 +41,6 @@ export class YandexSdk extends BaseSdk {
                                     resolve(true);
                                 });
                         });
-
-
-
 
                         Promise.all([getPlayerPromise, getLeaderboardsPromise, getSafeStoragePromiseWithFallback])
                             .finally(() => {
@@ -381,6 +379,63 @@ export class YandexSdk extends BaseSdk {
             }
         });
     }
+
+    init_purchases(params: any, cb: CbResultData) {
+        this._platformSdk.getPayments({ signed: true }).then(_payments => {
+            this._yandex_payments = _payments;
+            this.get_catalog({}, cb);
+        }).catch(err => {
+            this.error('init_purchases', err);
+            cb(false);
+        });
+    }
+
+    get_catalog(params: any, cb: CbResultData) {
+        if (!this._yandex_payments)
+            return cb(false, null);
+        this._yandex_payments.getCatalog().then(_catalog => {
+            cb(true, _catalog);
+        }).catch(err => {
+            this.error('get_catalog', err);
+            cb(false);
+        });
+    }
+
+    get_purchases(params: any, cb: CbResultData) {
+        if (!this._yandex_payments)
+            return cb(false, null);
+        this._yandex_payments.getPurchases().then(_purchases => {
+            cb(true, _purchases);
+        }).catch(err => {
+            this.error('get_purchases', err);
+            cb(false);
+        });
+
+    }
+
+    purchase(params: { id: string, developerPayload?: string }, cb: CbResultData) {
+        if (!this._yandex_payments)
+            return cb(false, null);
+        this._yandex_payments.purchase({ id: params.id, developerPayload: params.developerPayload }).then(_purchase => {
+            cb(true, _purchase);
+        }).catch(err => {
+            this.error('purchase', err);
+            cb(false);
+        });
+    }
+
+    consume_purchase(params: { token: string }, cb: CbResultData) {
+        if (!this._yandex_payments)
+            return cb(false);
+        this._yandex_payments.consumePurchase(params.token).then(_purchase => {
+            cb(true, _purchase);
+        }).catch(err => {
+            this.error('consume_purchase', err);
+            cb(false);
+        });
+    }
+
+
 
 
 }

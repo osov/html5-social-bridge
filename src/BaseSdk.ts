@@ -366,6 +366,33 @@ export class BaseSdk {
         return this._has_ad_block;
     }
 
+    // purchases
+
+    init_purchases(params: any, cb: CbResultData) {
+        this.warn('init_purchases', params);
+        cb(false);
+    }
+
+    get_catalog(params: any, cb: CbResultData) {
+        this.warn('get_catalog', params);
+        cb(false);
+    }
+
+    get_purchases(params: any, cb: CbResultData) {
+        this.warn('get_purchases', params);
+        cb(false);
+    }
+
+    purchase(params: any, cb: CbResultData) {
+        this.warn('purchase', params);
+        cb(false);
+    }
+
+    consume_purchase(params: { token: string }, cb: CbResultData) {
+        this.warn('consume_purchase', params);
+        cb(false);
+    }
+
     // bind events
 
     bind_visible_state(params: any, cb: CbVisibleState) {

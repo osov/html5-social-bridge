@@ -35,7 +35,7 @@ export interface LeaderboardItem {
 }
 
 
-export type CbLeaderboardList = (result: boolean, list: LeaderboardItem[]) => void
+export type CbLeaderboardList = (result: boolean, list: LeaderboardItem[]) => void;
 export type CbVisibleState = (visible: boolean) => void;
 export type CbInterstitialState = (state: INTERSTITIAL_STATE) => void;
 export type CbRewardedState = (state: REWARDED_STATE) => void;
