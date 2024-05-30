@@ -40,14 +40,14 @@ export class BaseSdk {
     }
 
     log(...args) {
-        console.log('platform-bridge:', ...args);
+        console.log('html-bridge:', ...args);
     }
 
     warn(...args) {
-        console.warn('platform-bridge:', ...args);
+        console.warn('html-bridge:', ...args);
     }
     error(...args) {
-        console.error('platform-bridge:', ...args);
+        console.error('html-bridge:', ...args);
     }
 
     get_platform() {
@@ -55,7 +55,17 @@ export class BaseSdk {
     }
 
     get_platform_device() {
-        return this.platform;
+        const ua = navigator.userAgent.toLowerCase();
+        const is_android = ua.indexOf("android") > -1;
+        const is_ios = [
+            'iPad Simulator',
+            'iPhone Simulator',
+            'iPod Simulator',
+            'iPad',
+            'iPhone',
+            'iPod'
+        ].includes(navigator.platform) || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+        return is_ios ? 'ios' : (is_android ? 'android' : 'pc');
     }
 
     get_platform_tld() {
@@ -390,6 +400,11 @@ export class BaseSdk {
 
     consume_purchase(params: { token: string }, cb: CbResultData) {
         this.warn('consume_purchase', params);
+        cb(false);
+    }
+
+    get_flags(params: any, cb: CbResultData) {
+        this.warn('get_flags', params);
         cb(false);
     }
 

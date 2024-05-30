@@ -435,7 +435,13 @@ export class YandexSdk extends BaseSdk {
         });
     }
 
-
-
+    get_flags(params: YandexGames.IGetFlagsParams, cb: CbResultData) {
+        this._platformSdk.getFlags(params).then(_flags => {
+            cb(true, _flags);
+        }).catch(err => {
+            this.error('get_flags', err);
+            cb(false);
+        });
+    }
 
 }

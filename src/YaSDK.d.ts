@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 declare module "CreexTeamYaSDK" {
   global {
     const YaGames: {
@@ -124,6 +125,21 @@ declare module "CreexTeamYaSDK" {
       getPayments(opts?: { signed?: boolean }): Promise<Payments>;
 
       getLeaderboards(): Promise<Leaderboards>;
+      getFlags(getFlagsParams?: IGetFlagsParams): Promise<IFlags>;
+    }
+
+    export interface IFlags {
+      [key: string]: string;
+    }
+
+    export interface ClientFeature {
+      name: string;
+      value: string;
+    }
+
+    export interface IGetFlagsParams {
+      defaultFlags?: IFlags;
+      clientFeatures?: ClientFeature[];
     }
 
     export type SafeStorage = typeof localStorage;
