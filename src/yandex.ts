@@ -3,7 +3,7 @@ import { addJavaScript } from "./utils";
 import { CbLeaderboardList, CbResultData, CbResultVal, INTERSTITIAL_STATE, REWARDED_STATE } from "./types";
 import { BaseSdk } from "./BaseSdk";
 
-const SDK_URL = 'https://yandex.ru/games/sdk/v2';
+const SDK_URL = 'https://yandex.ru/games/sdk.js';
 
 export class YandexSdk extends BaseSdk {
     _platformId = 'yandex';
