@@ -6,6 +6,8 @@ import { BaseSdk } from "./BaseSdk";
 import { YandexSdk } from "./yandex";
 import { OkSdk } from "./ok";
 import { VkSdk } from "./vk";
+import { bind_errors } from "./errorsHandler";
+//bind_errors();
 
 (window as any).init_sdk_platform = function (params: any, cb: CbResultVal) {
     console.log('start init sdk');
