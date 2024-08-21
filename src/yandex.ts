@@ -3,7 +3,7 @@ import { addJavaScript } from "./utils";
 import { CbLeaderboardList, CbResultData, CbResultVal, INTERSTITIAL_STATE, REWARDED_STATE } from "./types";
 import { BaseSdk } from "./BaseSdk";
 
-const SDK_URL = 'https://yandex.ru/games/sdk.js';
+const SDK_URL = '/sdk.js'; // https://sdk.games.s3.yandex.net/sdk.js
 
 export class YandexSdk extends BaseSdk {
     _platformId = 'yandex';
@@ -351,11 +351,16 @@ export class YandexSdk extends BaseSdk {
                     this._set_interstitial_state(INTERSTITIAL_STATE.OPENED);
                 },
                 onClose: wasShown => {
-                    if (wasShown) {
+                    if (wasShown)
                         this._set_interstitial_state(INTERSTITIAL_STATE.CLOSED);
-                    } else {
+                    else
                         this._set_interstitial_state(INTERSTITIAL_STATE.FAILED);
-                    }
+                },
+                onError: error => {
+                    this.error('show_interstitial error:', error);
+                },
+                onOffline: () => {
+
                 }
             }
         });
@@ -378,6 +383,10 @@ export class YandexSdk extends BaseSdk {
                 }
             }
         });
+    }
+
+    game_ready() {
+        this._platformSdk.features.LoadingAPI?.ready();
     }
 
     init_purchases(params: any, cb: CbResultData) {

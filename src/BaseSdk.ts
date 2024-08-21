@@ -376,6 +376,10 @@ export class BaseSdk {
         return this._has_ad_block;
     }
 
+    game_ready() {
+        //
+    }
+
     // purchases
 
     init_purchases(params: any, cb: CbResultData) {

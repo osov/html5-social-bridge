@@ -325,4 +325,8 @@ export class VkSdk extends BaseSdk {
             });
     }
 
+    game_ready() {
+        //
+    }
+
 }

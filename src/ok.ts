@@ -332,4 +332,8 @@ export class OkSdk extends BaseSdk {
         this._platformSdk.UI.loadAd();
     }
 
+    game_ready() {
+        //
+    }
+
 }
