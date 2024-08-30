@@ -29,7 +29,10 @@ import { bind_errors } from "./errorsHandler";
     const url = new URL(window.location.href);
     if (url.hostname.includes('yandex') || url.hash.includes('yandex'))
         sdk = new YandexSdk(do_ready);
-    else if (url.searchParams.has('api_id') && url.searchParams.has('viewer_id') && url.searchParams.has('auth_key'))
+    else if (
+        (url.searchParams.has('api_id') && url.searchParams.has('viewer_id') && url.searchParams.has('auth_key')) ||
+        (url.searchParams.has('vk_app_id'))
+    )
         sdk = new VkSdk(do_ready);
     else if (url.searchParams.has('web_server') && url.searchParams.has('application_key') && url.searchParams.has('api_server'))
         sdk = new OkSdk(do_ready);

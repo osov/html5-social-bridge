@@ -16,6 +16,8 @@ export class VkSdk extends BaseSdk {
         const url = new URL(window.location.href);
         if (url.searchParams.has('platform'))
             this.platform = url.searchParams.get('platform');
+        else if (url.searchParams.has('vk_platform'))
+            this.platform = url.searchParams.get('vk_platform');
 
         addJavaScript(SDK_URL).then(() => {
             this._platformSdk = (window as any).vkBridge;
@@ -83,8 +85,13 @@ export class VkSdk extends BaseSdk {
 
     get_language() {
         const url = new URL(window.location.href);
-        if (url.searchParams.has('language')) {
-            let language: number | string = url.searchParams.get('language');
+        let language: number | string = '';
+        if (url.searchParams.has('language'))
+            language = url.searchParams.get('language');
+        else if (url.searchParams.has('vk_language'))
+            language = url.searchParams.get('vk_language');
+
+        if (language != '') {
             try { language = parseInt(language); }
             catch (e) { }
 
