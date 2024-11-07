@@ -334,6 +334,10 @@ export class BaseSdk {
     hide_banner() {
     }
 
+    is_visible_banner(params: any, cb: CbResultData) {
+        cb(false, null);
+    }
+
     show_interstitial() {
         this._set_interstitial_state(INTERSTITIAL_STATE.OPENED);
         setTimeout(() => this._set_interstitial_state(INTERSTITIAL_STATE.CLOSED), 2000);
@@ -341,7 +345,10 @@ export class BaseSdk {
 
     show_rewarded() {
         this._set_rewarded_state(REWARDED_STATE.OPENED);
-        setTimeout(() => this._set_rewarded_state(REWARDED_STATE.CLOSED), 2000);
+        setTimeout(() => {
+            this._set_rewarded_state(REWARDED_STATE.REWARDED);
+            this._set_rewarded_state(REWARDED_STATE.CLOSED);
+        }, 2000);
     }
 
     is_lock_url(url: string, method: string) {

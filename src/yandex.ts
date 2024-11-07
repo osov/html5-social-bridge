@@ -341,7 +341,23 @@ export class YandexSdk extends BaseSdk {
                 this.error(error);
                 cb(false, []);
             });
+    }
 
+    show_banner(params?: any) {
+        this._platformSdk.adv.showBannerAdv();
+    }
+
+    hide_banner() {
+        this._platformSdk.adv.hideBannerAdv();
+    }
+
+    is_visible_banner(params: any, cb: CbResultData) {
+        this._platformSdk.adv.getBannerAdvStatus().then(({ stickyAdvIsShowing, reason }) => {
+            return cb(stickyAdvIsShowing, reason);
+        }).catch(err => {
+            this.error('is_visible_banner', err);
+            cb(false, null);
+        });
     }
 
     show_interstitial() {
