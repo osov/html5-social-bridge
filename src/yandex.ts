@@ -469,4 +469,8 @@ export class YandexSdk extends BaseSdk {
         });
     }
 
+    get_payload() {
+        return this._platformSdk.environment.payload || '';
+    }
+
 }
