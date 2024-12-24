@@ -205,12 +205,31 @@ export class OkSdk extends BaseSdk {
                         }
                     }
                     cb(result);
+                    this.delete_old_storage_data(data.keys);
                 }, false);
             } else {
                 this.error('status:', status, 'data:', data, 'error:', error);
                 return cb(false);
             }
         });
+    }
+
+    delete_old_storage_data(keys: string[], min_keys = 0) {
+        if (keys.length > min_keys && keys.length > 0) {
+            this.log('check delete old storage data...', keys);
+            const del_ids: string[] = [];
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
+                if (key.indexOf('_v2') == -1)
+                    del_ids.push(key);
+            }
+            if (del_ids.length > 0) {
+                this.log('delete old storage data:', del_ids);
+                this.delete_data_from_storage({ key: del_ids }, () => this.log('delete old storage data finished'));
+            }
+            else
+                this.log('delete old storage data not required');
+        }
     }
 
 
@@ -277,8 +296,8 @@ export class OkSdk extends BaseSdk {
         }
     }
 
-    // todo не чекал, удалит ли
-    delete_data_from_storage(params: { key: string }, cb: CbResultVal) {
+    // удаляет ключ или массив ключей
+    delete_data_from_storage(params: { key: string | string[] }, cb: CbResultVal) {
         if (Array.isArray(params.key)) {
             const promises = [];
             for (let i = 0; i < params.key.length; i++)
@@ -288,6 +307,8 @@ export class OkSdk extends BaseSdk {
             return this.set_data_to_storage({ key: params.key, value: '' }, cb);
         }
     }
+
+
 
     check_and_migrate_data(params: { keys: string[], data: { [k: string]: any } }, cb: CbResultVal) {
         this.log('check migrate [OK]...');

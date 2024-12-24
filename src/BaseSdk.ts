@@ -130,6 +130,9 @@ export class BaseSdk {
         delete this._platformStorageCachedData[key];
     }
 
+    delete_old_storage_data(keys: string[], max_keys = 10) {
+    }
+
 
     encode_storage_value(value: any) {
         if (typeof value !== 'string')
