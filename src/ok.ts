@@ -205,7 +205,6 @@ export class OkSdk extends BaseSdk {
                         }
                     }
                     cb(result);
-                    this.delete_old_storage_data(data.keys);
                 }, false);
             } else {
                 this.error('status:', status, 'data:', data, 'error:', error);

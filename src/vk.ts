@@ -123,7 +123,7 @@ export class VkSdk extends BaseSdk {
 
     load_all_data_from_storage(cb: CbResultVal) {
         this._platformStorageCachedData = {}; // инициализируем тут, иначе не будет работать получение/установка кеш ключа
-        this._platformSdk.send('VKWebAppStorageGetKeys', { count: 50, offset: 0 })
+        this._platformSdk.send('VKWebAppStorageGetKeys', { count: 100, offset: 0 })
             .then(data => {
                 if (data.keys.length > 0) {
                     this.get_data_from_storage({ key: data.keys }, (result, data_arr) => {
