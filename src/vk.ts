@@ -2,7 +2,7 @@ import { BaseSdk } from "./BaseSdk";
 import { BANNER_STATE, CbResultData, CbResultVal, INTERSTITIAL_STATE, REWARDED_STATE } from "./types";
 import { addJavaScript } from "./utils";
 
-const SDK_URL = 'https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
+const SDK_URL = 'browser.min.js'; //'https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js';
 
 export class VkSdk extends BaseSdk {
     _platformId = 'vk';
