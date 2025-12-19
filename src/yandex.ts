@@ -432,7 +432,7 @@ export class YandexSdk extends BaseSdk {
         this._yandex_payments.getPurchases().then(_purchases => {
             const signature = _purchases.signature;
             if (signature != undefined)
-                cb(true, signature);
+                cb(true, {signature, purchases:_purchases});
             else
                 cb(true, _purchases);
         }).catch(err => {
@@ -448,7 +448,7 @@ export class YandexSdk extends BaseSdk {
         this._yandex_payments.purchase({ id: params.id, developerPayload: params.developerPayload }).then(_purchase => {
             const signature = _purchase.signature;
             if (signature != undefined)
-                cb(true, _purchase.signature);
+                cb(true, {signature, purchase:_purchase});
             else
                 cb(true, _purchase);
         }).catch(err => {
