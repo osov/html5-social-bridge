@@ -1,23 +1,23 @@
-import { YandexGames } from "CreexTeamYaSDK";
+import type { SDK, Player, Leaderboards, Payments, GetFlagsParams } from "ysdk";
 import { addJavaScript } from "./utils";
 import { CbLeaderboardList, CbResultData, CbResultVal, INTERSTITIAL_STATE, REWARDED_STATE } from "./types";
 import { BaseSdk } from "./BaseSdk";
 
-const SDK_URL = '/sdk.js'; // https://sdk.games.s3.yandex.net/sdk.js
+const SDK_URL =  'https://sdk.games.s3.yandex.net/sdk.js'; // '/sdk.js';
 
 export class YandexSdk extends BaseSdk {
     _platformId = 'yandex';
-    private _leaderboards: YandexGames.Leaderboards;
-    private _platformSdk: YandexGames.SDK;
-    private _yandexPlayer: YandexGames.Player;
-    private _yandex_payments: YandexGames.Payments;
+    private _leaderboards: Leaderboards;
+    private _platformSdk: SDK<true>;
+    private _yandexPlayer: Player;
+    private _yandex_payments: Payments<true>;
 
 
     constructor(cb_ready: CbResultVal) {
         super(() => { });
         addJavaScript(SDK_URL)
             .then(() => {
-                YaGames.init()
+                YaGames.init({ signed: true })
                     .then(sdk => {
                         this._platformSdk = sdk;
 
@@ -64,7 +64,7 @@ export class YandexSdk extends BaseSdk {
     }
 
     get_player(options: any, cb: CbResultVal) {
-        const parameters = {
+        const parameters: { scopes?: boolean } = {
             scopes: false
         };
 
@@ -72,7 +72,7 @@ export class YandexSdk extends BaseSdk {
             parameters.scopes = options.scopes;
 
 
-        this._platformSdk.getPlayer(parameters)
+        this._platformSdk.getPlayer(parameters as any)
             .then(player => {
                 this._playerId = player.getUniqueID();
                 this._isPlayerAuthorized = player.getMode() !== 'lite';
@@ -430,7 +430,11 @@ export class YandexSdk extends BaseSdk {
         if (!this._yandex_payments)
             return cb(false, null);
         this._yandex_payments.getPurchases().then(_purchases => {
-            cb(true, _purchases);
+            const signature = _purchases.signature;
+            if (signature != undefined)
+                cb(true, signature);
+            else
+                cb(true, _purchases);
         }).catch(err => {
             this.error('get_purchases', err);
             cb(false);
@@ -442,7 +446,11 @@ export class YandexSdk extends BaseSdk {
         if (!this._yandex_payments)
             return cb(false, null);
         this._yandex_payments.purchase({ id: params.id, developerPayload: params.developerPayload }).then(_purchase => {
-            cb(true, _purchase);
+            const signature = _purchase.signature;
+            if (signature != undefined)
+                cb(true, _purchase.signature);
+            else
+                cb(true, _purchase);
         }).catch(err => {
             this.error('purchase', err);
             cb(false);
@@ -460,7 +468,7 @@ export class YandexSdk extends BaseSdk {
         });
     }
 
-    get_flags(params: YandexGames.IGetFlagsParams, cb: CbResultData) {
+    get_flags(params: GetFlagsParams, cb: CbResultData) {
         this._platformSdk.getFlags(params).then(_flags => {
             cb(true, _flags);
         }).catch(err => {
