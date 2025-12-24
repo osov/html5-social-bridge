@@ -336,4 +336,37 @@ export class VkSdk extends BaseSdk {
         //
     }
 
+    init_purchases(params: any, cb: CbResultData) {
+        this.get_catalog({}, cb);
+    }
+
+    get_catalog(params: any, cb: CbResultData) {
+        cb(true, []);
+    }
+
+    get_purchases(params: any, cb: CbResultData) {
+        return cb(false, null);
+    }
+
+    purchase(params: { id: string, developerPayload?: string }, cb: CbResultData) {
+        this._platformSdk.send('VKWebAppShowOrderBox', { type: 'item', item: params.id })
+            .then(data => {
+                console.log('purchase ok', data);
+                if (data.success == true) {
+                    cb(true, { signature: '', purchase: data.order_id });
+                } else {
+                    cb(false);
+                }
+
+            })
+            .catch(error => {
+                console.error('purchase error', error);
+                cb(false);
+            });
+    }
+
+    consume_purchase(params: { token: string }, cb: CbResultData) {
+
+    }
+
 }

@@ -116,6 +116,9 @@ export class OkSdk extends BaseSdk {
                     }
                 }
 
+                if (method == 'showPayment') {
+                    console.log('showPayment', result, data);
+                }
 
             };
 
@@ -354,6 +357,34 @@ export class OkSdk extends BaseSdk {
 
     game_ready() {
         //
+    }
+
+    init_purchases(params: any, cb: CbResultData) {
+        this.get_catalog({}, cb);
+    }
+
+    get_catalog(params: any, cb: CbResultData) {
+        cb(true, []);
+    }
+
+    get_purchases(params: any, cb: CbResultData) {
+        return cb(false, null);
+    }
+
+    purchase(params: { id: string, developerPayload?: string, price?: number, valute?: string }, cb: CbResultData) {
+        this._platformSdk.UI.showPayment(
+            `Изумруды x${params.id}`,  // название
+            `Пакет изумрудов`,            // описание
+            params.id,                  // код товара: "300", "1000", "3500"
+            params.price,               // цена в OK-коинах
+            null,                          // доп. атрибуты
+            params.valute != undefined ? params.valute : 'ok',                          // валюта
+            'true'                         // показать диалог
+        );
+    }
+
+    consume_purchase(params: { token: string }, cb: CbResultData) {
+
     }
 
 }
