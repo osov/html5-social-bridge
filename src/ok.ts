@@ -3,6 +3,7 @@ import { BANNER_STATE, CbResultData, CbResultVal, INTERSTITIAL_STATE, REWARDED_S
 import { addJavaScript } from "./utils";
 
 const SDK_URL = 'https://api.ok.ru/js/fapi5.js';
+const OKSDK_URL = 'oksdk.js';
 
 
 export class OkSdk extends BaseSdk {
@@ -10,10 +11,34 @@ export class OkSdk extends BaseSdk {
     _platformSdk: any;
     _bannerVisible = false;
     _isPlayerAuthorized = true;
+    _isMobile = false;
+    _oksdkReady = false;
 
     constructor(cb_ready: CbResultVal) {
         super(() => { });
         this.check_ad_block();
+
+        // Обработчик postMessage для мобильных платежей OKSDK
+        window.addEventListener('message', (event) => {
+            if (typeof event.data === 'string') {
+                if (event.data === 'payment=ok' || event.data.includes('payment=ok')) {
+                    this.log('Mobile payment success (postMessage)');
+                } else if (event.data === 'payment=cancel' || event.data.includes('payment=cancel')) {
+                    this.log('Mobile payment cancelled (postMessage)');
+                }
+            }
+            // Также проверяем формат объекта от OKSDK
+            if (event.data && typeof event.data === 'object') {
+                if (event.data.type === 'payment') {
+                    if (event.data.result === 'ok') {
+                        this.log('Mobile payment success (OKSDK postMessage)');
+                    } else if (event.data.result === 'cancel') {
+                        this.log('Mobile payment cancelled (OKSDK postMessage)');
+                    }
+                }
+            }
+        });
+
         addJavaScript(SDK_URL).then(() => {
             this._platformSdk = (window as any).FAPI;
 
@@ -130,10 +155,34 @@ export class OkSdk extends BaseSdk {
                     // здесь можно вызывать методы API
                     const isMob = this._platformSdk.Util.getRequestParameters().mob == 'true';
 
+                    this._isMobile = isMob;
                     this._isBannerSupported = isMob;
                     this._playerId = rParams['logged_user_id'];
                     this._playerName = rParams['user_name'];
                     this._playerPhotos = [rParams['user_image'] as string];
+
+                    // Загружаем OKSDK для мобильной платформы (для поддержки платежей)
+                    if (isMob) {
+                        addJavaScript(OKSDK_URL).then(() => {
+                            const OKSDK = (window as any).OKSDK;
+                            if (OKSDK && OKSDK.init) {
+                                OKSDK.init({
+                                    app_id: rParams['application_key'],
+                                    app_key: rParams['application_key']
+                                }, () => {
+                                    this.log('OKSDK initialized successfully');
+                                    this._oksdkReady = true;
+                                }, (error: any) => {
+                                    this.error('OKSDK init error', error);
+                                });
+                            } else {
+                                this.warn('OKSDK not available');
+                            }
+                        }).catch((err) => {
+                            this.error('Failed to load OKSDK', err);
+                        });
+                    }
+
                     this.load_all_data_from_storage(cb_ready);
                 },
                 /*функция, которая будет вызвана, если инициализация не удалась. */
@@ -372,14 +421,53 @@ export class OkSdk extends BaseSdk {
     }
 
     purchase(params: { id: string, developerPayload?: string, price?: number, valute?: string }, cb: CbResultData) {
+        if (this._isMobile) {
+            // Мобильная платформа - используем OKSDK
+            const OKSDK = (window as any).OKSDK;
+            if (OKSDK && OKSDK.Payment) {
+                // Определяем: приложение OK или мобильный браузер
+                const isOKApp = OKSDK.Util?.isLaunchedFromOKApp?.() ?? true;
+
+                if (isOKApp) {
+                    // Android-приложение OK - открываем в новом окне
+                    this.log('Mobile payment: OKSDK.Payment.show');
+                    OKSDK.Payment.show(
+                        `Изумруды x${params.id}`,  // название
+                        params.price,               // цена
+                        params.id,                  // код товара
+                        null                        // options (deprecated)
+                    );
+                } else {
+                    // Мобильный браузер Chrome - открываем в iframe
+                    this.log('Mobile payment: OKSDK.Payment.showInFrame');
+                    OKSDK.Payment.showInFrame(
+                        `Изумруды x${params.id}`,  // название
+                        params.price,               // цена
+                        params.id,                  // код товара
+                        null,                       // options
+                        'okPaymentFrame'            // ID iframe элемента
+                    );
+                }
+            } else {
+                // Fallback на FAPI если OKSDK недоступен
+                this.warn('OKSDK not available, falling back to FAPI');
+                this._showFAPIPayment(params);
+            }
+        } else {
+            // Веб-версия - используем FAPI
+            this._showFAPIPayment(params);
+        }
+    }
+
+    _showFAPIPayment(params: { id: string, price?: number, valute?: string }) {
         this._platformSdk.UI.showPayment(
-            `Изумруды x${params.id}`,  // название
+            `Изумруды x${params.id}`,     // название
             `Пакет изумрудов`,            // описание
-            params.id,                  // код товара: "300", "1000", "3500"
-            params.price,               // цена в OK-коинах
-            null,                          // доп. атрибуты
-            params.valute != undefined ? params.valute : 'ok',                          // валюта
-            'true'                         // показать диалог
+            params.id,                    // код товара: "300", "1000", "3500"
+            params.price,                 // цена в OK-коинах
+            null,                         // доп. атрибуты
+            params.valute != undefined ? params.valute : 'ok',  // валюта
+            'true'                        // показать диалог
         );
     }
 
