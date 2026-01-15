@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:apiok.ru)"
+      "WebFetch(domain:apiok.ru)",
+      "WebFetch(domain:docs.gamepush.com)",
+      "WebFetch(domain:gamepush.com)"
     ]
   }
 }
