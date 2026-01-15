@@ -3,7 +3,8 @@
     "allow": [
       "WebFetch(domain:apiok.ru)",
       "WebFetch(domain:docs.gamepush.com)",
-      "WebFetch(domain:gamepush.com)"
+      "WebFetch(domain:gamepush.com)",
+      "Bash(del \"D:\\\\Defold\\\\extensions\\\\html5-social-bridge\\\\src\\\\pikabu.ts\")"
     ]
   }
 }

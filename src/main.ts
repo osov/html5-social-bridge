@@ -6,7 +6,7 @@ import { BaseSdk } from "./BaseSdk";
 import { YandexSdk } from "./yandex";
 import { OkSdk } from "./ok";
 import { VkSdk } from "./vk";
-import { PikabuSdk } from "./pikabu";
+import { GamePushSdk } from "./gamepush-sdk";
 import { bind_errors } from "./errorsHandler";
 //bind_errors();
 
@@ -37,8 +37,8 @@ import { bind_errors } from "./errorsHandler";
         sdk = new VkSdk(do_ready);
     else if (url.searchParams.has('web_server') && url.searchParams.has('application_key') && url.searchParams.has('api_server'))
         sdk = new OkSdk(do_ready);
-    else if (url.hostname.includes('pikabu'))
-        sdk = new PikabuSdk(do_ready, params.projectId, params.token);
+    else if (params.projectId && params.token)
+        sdk = new GamePushSdk(do_ready, params.projectId, params.token);
     else
         sdk = new BaseSdk(do_ready, true);
 

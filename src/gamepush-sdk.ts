@@ -1,9 +1,9 @@
 import { BaseSdk } from "./BaseSdk";
 import { BANNER_STATE, CbResultData, CbResultVal, INTERSTITIAL_STATE, REWARDED_STATE } from "./types";
-import type { GamePush, GamePushPurchaseResult } from "./gamepush.d";
+import type { GamePush, GamePushPurchaseResult } from "./gamepush";
 
-export class PikabuSdk extends BaseSdk {
-    _platformId = 'pikabu';
+export class GamePushSdk extends BaseSdk {
+    _platformId = 'gamepush';
     private _gp: GamePush | null = null;
     private _projectId: string;
     private _token: string;
@@ -27,8 +27,7 @@ export class PikabuSdk extends BaseSdk {
                 this.log('GamePush player ready');
 
                 // Заполняем данные игрока
-                //this._playerId = String(gp.player.credentials || ''); // данные на пикабу ид
-                this._playerId = String(gp.player.id || ''); // данные геймпуш ид
+                this._playerId = String(gp.player.id || '');
                 this._playerName = gp.player.name || '';
                 this._playerPhotos = gp.player.avatar ? [gp.player.avatar] : [];
                 this._isPlayerAuthorized = gp.player.isLoggedIn || false;
@@ -116,7 +115,7 @@ export class PikabuSdk extends BaseSdk {
         try {
             if (Array.isArray(params.key)) {
                 const values = params.key.map(k => {
-                    const gpValue = this._gp.player.get(k);
+                    const gpValue = this._gp!.player.get(k);
                     if (gpValue !== undefined && gpValue !== null) {
                         return gpValue;
                     }
@@ -357,8 +356,8 @@ export class PikabuSdk extends BaseSdk {
 
         this._gp.payments.fetchProducts()
             .then(() => {
-                this.log('Products fetched:', this._gp.payments.products);
-                cb(true, this._gp.payments.products);
+                this.log('Products fetched:', this._gp!.payments.products);
+                cb(true, this._gp!.payments.products);
             })
             .catch((err: Error) => {
                 this.error('init_purchases error:', err);
