@@ -420,7 +420,7 @@ export class OkSdk extends BaseSdk {
         return cb(false, null);
     }
 
-    purchase(params: { id: string, developerPayload?: string, price?: number, valute?: string }, cb: CbResultData) {
+    purchase(params: { id: string, price: number }, cb: CbResultData) {
         if (this._isMobile) {
             // Мобильная платформа - используем OKSDK
             const OKSDK = (window as any).OKSDK;

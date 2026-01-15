@@ -348,7 +348,7 @@ export class VkSdk extends BaseSdk {
         return cb(false, null);
     }
 
-    purchase(params: { id: string, developerPayload?: string }, cb: CbResultData) {
+    purchase(params: { id: string}, cb: CbResultData) {
         this._platformSdk.send('VKWebAppShowOrderBox', { type: 'item', item: params.id })
             .then(data => {
                 console.log('purchase ok', data);
