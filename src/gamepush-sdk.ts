@@ -115,7 +115,7 @@ export class GamePushSdk extends BaseSdk {
         try {
             if (Array.isArray(params.key)) {
                 const values = params.key.map(k => {
-                    const gpValue = this._gp!.player.get(k);
+                    const gpValue = this._gp.player.get(k);
                     if (gpValue !== undefined && gpValue !== null) {
                         return gpValue;
                     }
@@ -356,8 +356,8 @@ export class GamePushSdk extends BaseSdk {
 
         this._gp.payments.fetchProducts()
             .then(() => {
-                this.log('Products fetched:', this._gp!.payments.products);
-                cb(true, this._gp!.payments.products);
+                this.log('Products fetched:', this._gp.payments.products);
+                cb(true, this._gp.payments.products);
             })
             .catch((err: Error) => {
                 this.error('init_purchases error:', err);
