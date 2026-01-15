@@ -27,7 +27,8 @@ export class PikabuSdk extends BaseSdk {
                 this.log('GamePush player ready');
 
                 // Заполняем данные игрока
-                this._playerId = String(gp.player.credentials || '');
+                //this._playerId = String(gp.player.credentials || ''); // данные на пикабу ид
+                this._playerId = String(gp.player.id || ''); // данные геймпуш ид
                 this._playerName = gp.player.name || '';
                 this._playerPhotos = gp.player.avatar ? [gp.player.avatar] : [];
                 this._isPlayerAuthorized = gp.player.isLoggedIn || false;
