@@ -154,6 +154,14 @@ export interface GamePushPlatform {
     hasIntegratedAuth: boolean;
 }
 
+export interface GamePushSocials {
+    /** Check if native share is supported */
+    isSupportsNativeShare: boolean;
+
+    /** Share game */
+    share(params?: { text?: string; url?: string; image?: string }): Promise<void>;
+}
+
 export interface GamePush {
     /** Player manager */
     player: GamePushPlayer;
@@ -163,4 +171,11 @@ export interface GamePush {
     payments: GamePushPayments;
     /** Platform info */
     platform: GamePushPlatform;
+    /** Socials manager */
+    socials: GamePushSocials;
+    /** Current language (ISO 639-1) */
+    language: string;
+
+    /** Call when game is fully loaded and ready */
+    gameStart(): Promise<void>;
 }

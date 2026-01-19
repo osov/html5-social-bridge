@@ -439,7 +439,31 @@ export class GamePushSdk extends BaseSdk {
     // ==================== Other ====================
 
     game_ready() {
-        // GamePush автоматически отслеживает готовность игры
+        if (this._gp) {
+            this._gp.gameStart();
+        }
         this.log('Game ready');
+    }
+
+    get_language() {
+        if (this._gp && this._gp.language) {
+            return this._gp.language.toLowerCase();
+        }
+        return super.get_language();
+    }
+
+    is_share_supported() {
+        return true; // GamePush поддерживает share через overlay
+    }
+
+    share(params?: { text?: string; url?: string; image?: string }, cb?: CbResultVal) {
+        if (!this._gp || !this._gp.socials) {
+            if (cb) cb(false);
+            return;
+        }
+
+        this._gp.socials.share(params || {})
+            .then(() => { if (cb) cb(true); })
+            .catch(() => { if (cb) cb(false); });
     }
 }
