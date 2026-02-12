@@ -41,6 +41,14 @@ export class GamePushSdk extends BaseSdk {
                 // Устанавливаем поддержку баннеров
                 this._isBannerSupported = gp.ads?.isStickyAvailable || false;
 
+                // Подписываемся на события звука
+                if (gp.sounds) {
+                    gp.sounds.on('mute:sfx', () => this._notify_sound_state());
+                    gp.sounds.on('unmute:sfx', () => this._notify_sound_state());
+                    gp.sounds.on('mute:music', () => this._notify_sound_state());
+                    gp.sounds.on('unmute:music', () => this._notify_sound_state());
+                }
+
                 // Загружаем данные из облачного хранилища
                 this.load_all_data_from_storage(cb_ready);
 
@@ -436,13 +444,54 @@ export class GamePushSdk extends BaseSdk {
             });
     }
 
+    // ==================== Sounds ====================
+
+    private _notify_sound_state() {
+        if (this.cb_sound_state && this._gp?.sounds) {
+            this.cb_sound_state(this._gp.sounds.isSFXMuted, this._gp.sounds.isMusicMuted);
+        }
+    }
+
+    sound_mute_sfx() {
+        if (this._gp?.sounds) {
+            this._gp.sounds.muteSFX();
+        }
+    }
+
+    sound_unmute_sfx() {
+        if (this._gp?.sounds) {
+            this._gp.sounds.unmuteSFX();
+        }
+    }
+
+    sound_mute_music() {
+        if (this._gp?.sounds) {
+            this._gp.sounds.muteMusic();
+        }
+    }
+
+    sound_unmute_music() {
+        if (this._gp?.sounds) {
+            this._gp.sounds.unmuteMusic();
+        }
+    }
+
+    sound_is_sfx_muted(): boolean {
+        return this._gp?.sounds?.isSFXMuted || false;
+    }
+
+    sound_is_music_muted(): boolean {
+        return this._gp?.sounds?.isMusicMuted || false;
+    }
+
     // ==================== Other ====================
 
     game_ready() {
         if (this._gp) {
+            this._gp.player.on('ready', () => {});
             this._gp.gameStart();
         }
-        this.log('Game ready');
+        this.log('Game ready[gamepush]');
     }
 
     get_language() {

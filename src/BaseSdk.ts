@@ -1,4 +1,4 @@
-import { BANNER_STATE, CbBannerState, CbInterstitialState, CbLeaderboardList, CbResultData, CbResultVal, CbRewardedState, CbVisibleState, INTERSTITIAL_STATE, REWARDED_STATE } from "./types";
+import { BANNER_STATE, CbBannerState, CbInterstitialState, CbLeaderboardList, CbResultData, CbResultVal, CbRewardedState, CbSoundState, CbVisibleState, INTERSTITIAL_STATE, REWARDED_STATE } from "./types";
 
 
 
@@ -20,6 +20,7 @@ export class BaseSdk {
     protected cb_interstitial_state: CbInterstitialState;
     protected cb_banner_state: CbBannerState;
     protected cb_rewarded_state: CbRewardedState;
+    protected cb_sound_state: CbSoundState;
     protected _interstitialState: INTERSTITIAL_STATE;
     protected _rewardedState: REWARDED_STATE;
     protected _bannerState: BANNER_STATE;
@@ -440,7 +441,30 @@ export class BaseSdk {
         this.cb_rewarded_state = cb;
     }
 
+    // sounds
 
+    bind_sound_events(params: any, cb: CbSoundState) {
+        this.cb_sound_state = cb;
+    }
 
+    sound_mute_sfx() {
+    }
+
+    sound_unmute_sfx() {
+    }
+
+    sound_mute_music() {
+    }
+
+    sound_unmute_music() {
+    }
+
+    sound_is_sfx_muted(): boolean {
+        return false;
+    }
+
+    sound_is_music_muted(): boolean {
+        return false;
+    }
 
 }

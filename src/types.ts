@@ -40,3 +40,4 @@ export type CbVisibleState = (visible: boolean) => void;
 export type CbInterstitialState = (state: INTERSTITIAL_STATE) => void;
 export type CbRewardedState = (state: REWARDED_STATE) => void;
 export type CbBannerState = (state: BANNER_STATE) => void;
+export type CbSoundState = (sfxMuted: boolean, musicMuted: boolean) => void;

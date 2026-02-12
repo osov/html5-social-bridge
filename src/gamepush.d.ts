@@ -33,6 +33,7 @@ export interface GamePushPlayer {
 
     /** Sync player data with cloud */
     sync(options?: { storage?: 'preferred' | 'cloud' | 'platform' | 'local' }): Promise<void>;
+    on(method:string, callback: (data: any) => void): void
 }
 
 export interface GamePushAds {
@@ -162,6 +163,21 @@ export interface GamePushSocials {
     share(params?: { text?: string; url?: string; image?: string }): Promise<void>;
 }
 
+export interface GamePushSounds {
+    isMuted: boolean;
+    isSFXMuted: boolean;
+    isMusicMuted: boolean;
+
+    mute(): void;
+    unmute(): void;
+    muteSFX(): void;
+    unmuteSFX(): void;
+    muteMusic(): void;
+    unmuteMusic(): void;
+
+    on(event: 'mute' | 'unmute' | 'mute:sfx' | 'unmute:sfx' | 'mute:music' | 'unmute:music', callback: () => void): void;
+}
+
 export interface GamePush {
     /** Player manager */
     player: GamePushPlayer;
@@ -173,6 +189,8 @@ export interface GamePush {
     platform: GamePushPlatform;
     /** Socials manager */
     socials: GamePushSocials;
+    /** Sounds manager */
+    sounds: GamePushSounds;
     /** Current language (ISO 639-1) */
     language: string;
 
