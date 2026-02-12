@@ -49,6 +49,27 @@ export class GamePushSdk extends BaseSdk {
                     gp.sounds.on('unmute:music', () => this._notify_sound_state());
                 }
 
+                // Подписываемся на событие авторизации (смена ID после логина)
+                gp.player.on('login', () => {
+                    const old_id = this._playerId;
+                    const new_id = String(gp.player.id || '');
+
+                    // Обновляем данные игрока
+                    this._playerId = new_id;
+                    this._playerName = gp.player.name || '';
+                    this._playerPhotos = gp.player.avatar ? [gp.player.avatar] : [];
+                    this._isPlayerAuthorized = gp.player.isLoggedIn || false;
+
+                    this.log('Player login:', { old_id, new_id, authorized: this._isPlayerAuthorized });
+
+                    // Уведомляем Defold о смене ID
+                    if (old_id !== new_id && old_id !== '' && new_id !== '') {
+                        if (this._cb_player_id_changed !== null) {
+                            this._cb_player_id_changed(old_id, new_id);
+                        }
+                    }
+                });
+
                 // Загружаем данные из облачного хранилища
                 this.load_all_data_from_storage(cb_ready);
 

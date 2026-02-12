@@ -21,6 +21,7 @@ export class BaseSdk {
     protected cb_banner_state: CbBannerState;
     protected cb_rewarded_state: CbRewardedState;
     protected cb_sound_state: CbSoundState;
+    protected _cb_player_id_changed: ((old_id: string, new_id: string) => void) | null = null;
     protected _interstitialState: INTERSTITIAL_STATE;
     protected _rewardedState: REWARDED_STATE;
     protected _bannerState: BANNER_STATE;
@@ -439,6 +440,10 @@ export class BaseSdk {
 
     bind_rewarded_events(params: any, cb: CbRewardedState) {
         this.cb_rewarded_state = cb;
+    }
+
+    bind_player_id_changed(params: any, cb: (old_id: string, new_id: string) => void) {
+        this._cb_player_id_changed = cb;
     }
 
     // sounds
