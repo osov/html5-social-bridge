@@ -23,6 +23,7 @@ export class VkSdk extends BaseSdk {
             this._platformSdk = (window as any).vkBridge;
 
             this._platformSdk.send('VKWebAppInit').then(() => {
+                this._platformSdk.send('VKWebAppBecameInteractive').catch(() => {});
                 this._isBannerSupported = true;
 
                 this._platformSdk.send('VKWebAppGetUserInfo')
