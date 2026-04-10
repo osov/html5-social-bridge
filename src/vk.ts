@@ -85,7 +85,6 @@ export class VkSdk extends BaseSdk {
     }
 
     get_language() {
-        return 'ru';
         const url = new URL(window.location.href);
         // современный VK Mini Apps передаёт vk_language строковым ISO-кодом
         // ('ru', 'uk', 'be', 'en', 'es', 'fi', 'de', 'it', 'kk' и т.д.);
