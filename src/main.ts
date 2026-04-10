@@ -32,7 +32,8 @@ import { bind_errors } from "./errorsHandler";
         sdk = new YandexSdk(do_ready);
     else if (
         (url.searchParams.has('api_id') && url.searchParams.has('viewer_id') && url.searchParams.has('auth_key')) ||
-        (url.searchParams.has('vk_app_id'))
+        (url.searchParams.has('vk_app_id')) ||
+        (window as any).vkBridge // мобильный VK может не передавать параметры в URL
     )
         sdk = new VkSdk(do_ready);
     else if (url.searchParams.has('web_server') && url.searchParams.has('application_key') && url.searchParams.has('api_server'))

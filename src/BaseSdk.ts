@@ -77,9 +77,14 @@ export class BaseSdk {
     get_language() {
         const value = navigator.language;
         if (typeof value === 'string') {
-            return value.substring(0, 2).toLowerCase();
+            const lang = value.substring(0, 2).toLowerCase();
+            // для русскоязычных платформ (VK, OK, Yandex, Pikabu):
+            // мобильные WebView часто отдают en-US независимо от локали аккаунта,
+            // поэтому 'en' ненадёжен — безопаснее дефолт 'ru'
+            if (lang === 'en') return 'ru';
+            return lang;
         }
-        return 'en';
+        return 'ru';
     }
 
     get_payload() {

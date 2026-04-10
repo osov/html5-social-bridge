@@ -85,34 +85,46 @@ export class VkSdk extends BaseSdk {
     }
 
     get_language() {
+        return 'ru';
         const url = new URL(window.location.href);
-        let language: number | string = '';
-        if (url.searchParams.has('language'))
-            language = url.searchParams.get('language');
-        else if (url.searchParams.has('vk_language'))
-            language = url.searchParams.get('vk_language');
+        // современный VK Mini Apps передаёт vk_language строковым ISO-кодом
+        // ('ru', 'uk', 'be', 'en', 'es', 'fi', 'de', 'it', 'kk' и т.д.);
+        // старый IFrame Apps API передавал число 0..3 — держим обратную совместимость.
+        // Fallback на 'ru' а не на navigator.language: в мобильных клиентах VK WebView
+        // возвращает en-US независимо от языка аккаунта, а VK — русскоязычная платформа.
+        let raw = '';
+        if (url.searchParams.has('vk_language'))
+            raw = url.searchParams.get('vk_language') || '';
+        else if (url.searchParams.has('language'))
+            raw = url.searchParams.get('language') || '';
 
-        if (language != '') {
-            try { language = parseInt(language); }
-            catch (e) { }
+        if (raw === '')
+            return 'ru';
 
-            switch (language) {
-                case 0: {
-                    return 'ru';
-                }
-                case 1: {
-                    return 'uk';
-                }
-                case 2: {
-                    return 'be';
-                }
-                case 3: {
-                    return 'en';
-                }
+        const normalized = raw.trim().toLowerCase();
+
+        // строковый ISO-код — возвращаем как есть
+        if (/^[a-z]{2}$/.test(normalized))
+            return normalized;
+
+        // устаревший числовой формат — мапим на ISO
+        const as_number = parseInt(normalized, 10);
+        switch (as_number) {
+            case 0: {
+                return 'ru';
+            }
+            case 1: {
+                return 'uk';
+            }
+            case 2: {
+                return 'be';
+            }
+            case 3: {
+                return 'en';
             }
         }
 
-        return super.get_language();
+        return 'ru';
     }
 
     get_payload() {
