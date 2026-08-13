@@ -29,7 +29,9 @@ export class VkSdk extends BaseSdk {
                 this._platformSdk.send('VKWebAppGetUserInfo')
                     .then(data => {
                         if (data) {
-                            this._playerId = data['id'];
+                            // VKWebAppGetUserInfo отдаёт id числом, а _playerId по контракту строка:
+                            // без приведения потребители моста на JS теряют id игрока.
+                            this._playerId = String(data['id'] || '');
                             this._playerName = (data['first_name'] as string) + ' ' + (data['last_name'] as string);
 
                             if (data['photo_100'])
@@ -56,6 +58,11 @@ export class VkSdk extends BaseSdk {
                     this.error(error);
                 });
             // }
+        }).catch((error) => {
+            // vk-bridge.js не загрузился: поднимаем мост без платформы,
+            // чтобы клиент получил window.sdk (язык, localStorage-хранилище).
+            this.error('Failed to load VK Bridge', error);
+            cb_ready(false);
         });
     }
 

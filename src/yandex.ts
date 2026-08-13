@@ -17,7 +17,8 @@ export class YandexSdk extends BaseSdk {
         super(() => { });
         addJavaScript(SDK_URL)
             .then(() => {
-                YaGames.init({ signed: true })
+                // return: отказ YaGames.init тоже должен дойти до общего catch ниже
+                return YaGames.init({ signed: true })
                     .then(sdk => {
                         this._platformSdk = sdk;
 
@@ -48,6 +49,12 @@ export class YandexSdk extends BaseSdk {
                                 this.load_all_data_from_storage(cb_ready);
                             });
                     });
+            })
+            .catch((error) => {
+                // sdk.js не загрузился или YaGames.init упал: поднимаем мост без
+                // платформы, чтобы клиент получил window.sdk и не висел до таймаута.
+                this.error('Failed to init Yandex SDK', error);
+                cb_ready(false);
             });
     }
 

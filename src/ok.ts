@@ -186,12 +186,19 @@ export class OkSdk extends BaseSdk {
                     this.load_all_data_from_storage(cb_ready);
                 },
                 /*функция, которая будет вызвана, если инициализация не удалась. */
-                function (error) {
+                // строго стрелочная функция: обычная function теряла this (undefined),
+                // this.error кидал TypeError до cb_ready(false), и window.sdk не поднимался
+                (error) => {
                     this.error("Ошибка инициализации", error);
                     cb_ready(false);
                 }
             );
             //  }, 10);
+        }).catch((error) => {
+            // fapi5.js не загрузился (сеть/блокировщик): поднимаем мост без FAPI,
+            // чтобы клиент получил window.sdk — язык и локальный кеш продолжат работать.
+            this.error('Failed to load FAPI', error);
+            cb_ready(false);
         });
 
     }
